@@ -3,9 +3,11 @@
 bin/
 build/
 out/
+cache/
 /gradlew.bat
 /gradlew
 
+/xteas.json
 .settings/
 
 .classpath
