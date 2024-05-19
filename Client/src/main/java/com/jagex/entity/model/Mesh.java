@@ -1129,7 +1129,7 @@ public class Mesh extends Renderable {
 
                 int texId = faceMaterial[index];
                 //texId = 23;
-                rasterizer.drawTexturedTriangle(
+                rasterizer.drawTexturedTriangle_Model(
                         rasterizer.vertexScreenY[faceX],
                         rasterizer.vertexScreenY[faceY],
                         rasterizer.vertexScreenY[faceZ],
@@ -1276,7 +1276,7 @@ public class Mesh extends Renderable {
                         texFaceZ = faceZ;
                     }
 
-                    rasterizer.drawTexturedTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
+                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
                             rasterizer.anIntArray1680[2], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
                             rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
                             rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
@@ -1300,7 +1300,7 @@ public class Mesh extends Renderable {
                         texFaceZ = faceZ;
                     }
 
-                    rasterizer.drawTexturedTriangle(i7, j7, k7, j3, j4, j5, shadedtriangleColorsX[index], shadedtriangleColorsX[index],
+                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, shadedtriangleColorsX[index], shadedtriangleColorsX[index],
                             shadedtriangleColorsX[index], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
                             rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
                             rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
@@ -1348,11 +1348,11 @@ public class Mesh extends Renderable {
                         texFaceZ = faceZ;
                     }
 
-                    rasterizer.drawTexturedTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
+                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
                             rasterizer.anIntArray1680[2], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
                             rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
                             rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
-                    rasterizer.drawTexturedTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
+                    rasterizer.drawTexturedTriangle_Model(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
                             rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[2], rasterizer.anIntArray1680[3], rasterizer.camera_vertex_x[texFaceX],
                             rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ], rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY],
                             rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX], rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ],
@@ -1378,11 +1378,11 @@ public class Mesh extends Renderable {
                         texFaceZ = faceZ;
                     }
 
-                    rasterizer.drawTexturedTriangle(i7, j7, k7, j3, j4, j5, shadedtriangleColorsX[index], shadedtriangleColorsX[index],
+                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, shadedtriangleColorsX[index], shadedtriangleColorsX[index],
                             shadedtriangleColorsX[index], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
                             rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
                             rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
-                    rasterizer.drawTexturedTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
+                    rasterizer.drawTexturedTriangle_Model(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
                             shadedtriangleColorsX[index], shadedtriangleColorsX[index], shadedtriangleColorsX[index], rasterizer.camera_vertex_x[texFaceX],
                             rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ], rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY],
                             rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX], rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ],

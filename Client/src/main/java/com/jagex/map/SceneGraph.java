@@ -3409,11 +3409,11 @@ public class SceneGraph {
 				}
 			} else if (!lowMemory) {
 				if (tile.isFlat()) {
-					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+					GameRasterizer.getInstance().drawTexturedTriangle_Scene(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
 							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xA, xB, xC,
 							centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
 				} else {
-					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+					GameRasterizer.getInstance().drawTexturedTriangle_Scene(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
 							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
 							northEastHeight, northHeight, eastHeight, yD, yC, yB, tile.getTexture());
 				}
@@ -3442,7 +3442,7 @@ public class SceneGraph {
 			} else {
 				if (!lowMemory) {
 					if (tile.getCentreColour() != 0xbc614e) {
-						GameRasterizer.getInstance().drawTexturedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+						GameRasterizer.getInstance().drawTexturedTriangle_Scene(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 								tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour(), xA, xB, xC,
 								centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
 					}
@@ -3536,11 +3536,11 @@ public class SceneGraph {
 				}
 			} else if (!lowMemory) {
 				if (tile.isFlat()) {
-					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+					GameRasterizer.getInstance().drawTexturedTriangle_Scene(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
 							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xA, xB, xC,
 							centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
 				} else {
-					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+					GameRasterizer.getInstance().drawTexturedTriangle_Scene(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
 							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
 							northEastHeight, northHeight, eastHeight, yD, yC, yB, tile.getTexture());
 				}
@@ -3575,7 +3575,7 @@ public class SceneGraph {
 			} else {
 				if (!lowMemory) {
 					if (tile.getCentreColour() != 0xbc614e) {
-						GameRasterizer.getInstance().drawTexturedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+						GameRasterizer.getInstance().drawTexturedTriangle_Scene(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 								tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour(), xA, xB, xC,
 								centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
 					}
@@ -3668,7 +3668,7 @@ public class SceneGraph {
 					}
 				} else if (!lowMemory) {
 					if (tile.isFlat()) {
-						GameRasterizer.getInstance().drawTexturedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
+						GameRasterizer.getInstance().drawTexturedTriangle_Scene(sYA, sYB, sYC, sXA, sXB, sXC,
 								tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
 								tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[0],
 								ShapedTile.viewSpaceX[1], ShapedTile.viewSpaceX[3], ShapedTile.viewSpaceY[0],
@@ -3676,7 +3676,7 @@ public class SceneGraph {
 								ShapedTile.viewSpaceZ[1], ShapedTile.viewSpaceZ[3],
 								tile.getTriangleTexture()[triangleIndex]);
 					} else {
-						GameRasterizer.getInstance().drawTexturedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
+						GameRasterizer.getInstance().drawTexturedTriangle_Scene(sYA, sYB, sYC, sXA, sXB, sXC,
 								tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
 								tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[indexA],
 								ShapedTile.viewSpaceX[indexB], ShapedTile.viewSpaceX[indexC],

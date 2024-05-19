@@ -14,10 +14,6 @@ public abstract class TextureLoader implements DataLoaderBase<Texture> {
 	public abstract int[] getPixels(int id);
 	public abstract void setBrightness(double exponent);
 	public abstract boolean isTransparent(int id);
-
-	public static Texture[] getTextures(){
-		return IntStream.range(0, instance.count()).mapToObj(TextureLoader::getTexture).collect(Collectors.toList()).toArray(new Texture[instance.count()]);
-	}
 	
 	public static Texture getTexture(int id) {
 		return instance.forId(id);
