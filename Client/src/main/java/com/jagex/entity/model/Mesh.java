@@ -1090,11 +1090,11 @@ public class Mesh extends Renderable {
         boolean ignoreTextures = translucent || selected;
 
         if (type == 0 && !ignoreTextures) {
-            rasterizer.drawShadedTriangle(rasterizer.vertexScreenY[faceX], rasterizer.vertexScreenY[faceY], rasterizer.vertexScreenY[faceZ], rasterizer.vertexScreenX[faceX],
+            rasterizer.drawGouraudTriangle(rasterizer.vertexScreenY[faceX], rasterizer.vertexScreenY[faceY], rasterizer.vertexScreenY[faceZ], rasterizer.vertexScreenX[faceX],
                     rasterizer.vertexScreenX[faceY], rasterizer.vertexScreenX[faceZ], shadedtriangleColorsX[index], shadedtriangleColorsY[index], shadedtriangleColorsZ[index]);
         } else if (type == 1 || ignoreTextures) {
             int colour = selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[shadedtriangleColorsX[index]];
-            rasterizer.drawShadedTriangle(rasterizer.vertexScreenY[faceX], rasterizer.vertexScreenY[faceY], rasterizer.vertexScreenY[faceZ], rasterizer.vertexScreenX[faceX],
+            rasterizer.drawGouraudTriangle(rasterizer.vertexScreenY[faceX], rasterizer.vertexScreenY[faceY], rasterizer.vertexScreenY[faceZ], rasterizer.vertexScreenX[faceX],
                     rasterizer.vertexScreenX[faceY], rasterizer.vertexScreenX[faceZ], colour);
         } else if (type == 2 || type == 3) {
 
@@ -1251,10 +1251,10 @@ public class Mesh extends Renderable {
                 }
 
                 if (type == 0 && !ignoreTextures) {
-                    rasterizer.drawShadedTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
+                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
                             rasterizer.anIntArray1680[2]);
                 } else if (type == 1 || ignoreTextures) {
-                    rasterizer.drawShadedTriangle(i7, j7, k7, j3, j4, j5,
+                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5,
                             selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[shadedtriangleColorsX[index]]);
                 } else if (type == 2) {
                     int texFaceX, texFaceY, texFaceZ;
@@ -1318,15 +1318,15 @@ public class Mesh extends Renderable {
                     type = triangleInfo[index] & 3;
                 }
                 if (type == 0 && !ignoreTextures) {
-                    rasterizer.drawShadedTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
+                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
                             rasterizer.anIntArray1680[2]);
-                    rasterizer.drawShadedTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
+                    rasterizer.drawGouraudTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
                             rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[2], rasterizer.anIntArray1680[3]);
                     return;
                 } else if (type == 1 || ignoreTextures) {
                     int l8 = selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[shadedtriangleColorsX[index]];
-                    rasterizer.drawShadedTriangle(i7, j7, k7, j3, j4, j5, l8);
-                    rasterizer.drawShadedTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], l8);
+                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, l8);
+                    rasterizer.drawGouraudTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], l8);
                     return;
                 } else if (type == 2) {
                     int texFaceX, texFaceY, texFaceZ;

@@ -690,13 +690,6 @@ public class MainWindow extends Application {
 
 
 			ApplicationPluginLoader.loadPlugins(this);
-			ChangeListenerUtil.addListener(() -> {
-				if(Client.gameLoaded.get()) {
-					underlaySwatch.clear();
-					overlaySwatch.clear();
-					fillSwatches();
-				}
-			}, Options.hdTextures);
 			
 			this.setupOpenOptions();
 			this.setupSaveOptions();

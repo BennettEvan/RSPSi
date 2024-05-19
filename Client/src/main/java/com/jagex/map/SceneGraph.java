@@ -3397,65 +3397,32 @@ public class SceneGraph {
 		if ((screenXD - screenXC) * (screenYB - screenYC) - (screenYD - screenYC) * (screenXB - screenXC) > 0) {
 			GameRasterizer.getInstance().restrictEdges = screenXD < 0 || screenXC < 0 || screenXB < 0 || screenXD > GameRasterizer.getInstance().getMaxRight() || screenXC > GameRasterizer.getInstance().getMaxRight()
 					|| screenXB > GameRasterizer.getInstance().getMaxRight();
-
-
-			if (Options.hdTextures.get()) {
-
-				if (hiddenTile) {
-					GameRasterizer.getInstance().currentAlpha = 170;
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+			if (hiddenTile) {
+				GameRasterizer.getInstance().currentAlpha = 170;
+				GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+						tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
+				GameRasterizer.getInstance().currentAlpha = 0;
+			} else if (tile.getTexture() == -1) {
+				if (tile.getNorthEastColour() != 0xbc614e) {
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
 							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
-					GameRasterizer.getInstance().currentAlpha = 0;
-				} else if (!lowMemory && tile.getTexture() != -1) {
-
-					if (tile.getNorthEastColour() != 0xbc614e) {
-						if (tile.isFlat()) {
-							GameRasterizer.getInstance().render_texture_triangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-									yD, yC, yB,
-									tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(),
-									xA, xB, xC,
-									centreHeight, eastHeight, northHeight, yA, yB, yC, !lowMemory || tile.getTileColour() == -1 ? tile.getTexture() : -1, tile.getColour(), true, true);
-						} else {
-							GameRasterizer.getInstance().render_texture_triangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-									yD, yC, yB,
-									tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
-									northEastHeight, northHeight, eastHeight, yD, yC, yB, !lowMemory || tile.getTileColour() == -1 ? tile.getTexture() : -1, tile.getColour(), true, true);
-						}
-					}
-				} else if (tile.getNorthEastColour() != 0xbc614e) {
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
+				}
+			} else if (!lowMemory) {
+				if (tile.isFlat()) {
+					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xA, xB, xC,
+							centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
+				} else {
+					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
+							northEastHeight, northHeight, eastHeight, yD, yC, yB, tile.getTexture());
 				}
 			} else {
-
-				if (hiddenTile) {
-					GameRasterizer.getInstance().currentAlpha = 170;
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
-					GameRasterizer.getInstance().currentAlpha = 0;
-				} else if (tile.getTexture() == -1) {
-					if (tile.getNorthEastColour() != 0xbc614e) {
-						GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
-					}
-				} else if (!lowMemory) {
-					if (tile.isFlat()) {
-						GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xA, xB, xC,
-								centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
-					} else {
-						GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
-								northEastHeight, northHeight, eastHeight, yD, yC, yB, tile.getTexture());
-					}
-				} else {
-					int textureColour = TEXTURE_COLOURS[tile.getTexture()];
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-							light(textureColour, tile.getNorthEastColour()), light(textureColour, tile.getNorthColour()),
-							light(textureColour, tile.getEastColour()));
-				}
+				int textureColour = TEXTURE_COLOURS[tile.getTexture()];
+				GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+						light(textureColour, tile.getNorthEastColour()), light(textureColour, tile.getNorthColour()),
+						light(textureColour, tile.getEastColour()));
 			}
-			// Rasterizer.drawRectangle(screen, y, screenXC, height, colour);
 		}
 
 		if ((screenXA - screenXB) * (screenYC - screenYB) - (screenYA - screenYB) * (screenXC - screenXB) > 0) {
@@ -3464,38 +3431,30 @@ public class SceneGraph {
 
 			if (hiddenTile) {
 				GameRasterizer.getInstance().currentAlpha = 170;
-				GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+				GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 						tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour());
 				GameRasterizer.getInstance().currentAlpha = 0;
 			} else if (tile.getTexture() == -1) {
 				if (tile.getCentreColour() != 0xbc614e) {
-					GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 							tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour());
 				}
 			} else {
 				if (!lowMemory) {
-					if (Options.hdTextures.get() && tile.getCentreColour() != 0xbc614e) {
-
-						GameRasterizer.getInstance().render_texture_triangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
-								yA, yB, yC,
-								tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour(), xA, xB, xC,
-								centreHeight, eastHeight, northHeight, yA, yB, yC, !lowMemory || tile.getTileColour() == -1 ? tile.getTexture() : -1, tile.getColour(), true, true);
-					} else if (tile.getCentreColour() != 0xbc614e) {
+					if (tile.getCentreColour() != 0xbc614e) {
 						GameRasterizer.getInstance().drawTexturedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 								tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour(), xA, xB, xC,
 								centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
 					}
-				} else if (!Options.hdTextures.get()) {
+				} else {
 					int j7 = TEXTURE_COLOURS[tile.getTexture()];
-					GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 							light(j7, tile.getCentreColour()), light(j7, tile.getEastColour()),
 							light(j7, tile.getNorthColour()));
 
 				}
 			}
-
 		}
-
 	}
 
 	public void renderPlainTile(SimpleTile tile, int plane, int ySin, int yCos, int xSin, int xCos, int tileX,
@@ -3562,66 +3521,35 @@ public class SceneGraph {
 				handleMouseInTile(tileX, tileY, plane);
 			}
 
-			if (Options.hdTextures.get()) {
-
-				if (hiddenTile) {
-					GameRasterizer.getInstance().currentAlpha = 170;
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+			if (hiddenTile) {
+				GameRasterizer.getInstance().currentAlpha = 170;
+				GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+						tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
+				GameRasterizer.getInstance().currentAlpha = 0;
+			} else if (tile.getTexture() == -1) {
+				if (tile.getNorthEastColour() != 0xbc614e) {
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
 							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
-					GameRasterizer.getInstance().currentAlpha = 0;
-				} else if (!lowMemory && tile.getTexture() != -1) {
-
-					if (tile.getNorthEastColour() != 0xbc614e) {
-						if (tile.isFlat()) {
-							GameRasterizer.getInstance().render_texture_triangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-									yD, yC, yB,
-									tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(),
-									xA, xB, xC,
-									centreHeight, eastHeight, northHeight, yA, yB, yC, !lowMemory || tile.getTileColour() == -1 ? tile.getTexture() : -1, tile.getColour(), true, true);
-						} else {
-							GameRasterizer.getInstance().render_texture_triangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-									yD, yC, yB,
-									tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
-									northEastHeight, northHeight, eastHeight, yD, yC, yB, !lowMemory || tile.getTileColour() == -1 ? tile.getTexture() : -1, tile.getColour(), true, true);
-						}
-					}
-				} else if (tile.getNorthEastColour() != 0xbc614e) {
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
+				} else if(Options.showHiddenTiles.get()){
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+							GameRasterizer.getInstance().getFuchsia(), 	GameRasterizer.getInstance().getFuchsia(), 	GameRasterizer.getInstance().getFuchsia());
+				}
+			} else if (!lowMemory) {
+				if (tile.isFlat()) {
+					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xA, xB, xC,
+							centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
+				} else {
+					GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
+							northEastHeight, northHeight, eastHeight, yD, yC, yB, tile.getTexture());
 				}
 			} else {
-
-				if (hiddenTile) {
-					GameRasterizer.getInstance().currentAlpha = 170;
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-							tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
-					GameRasterizer.getInstance().currentAlpha = 0;
-				} else if (tile.getTexture() == -1) {
-					if (tile.getNorthEastColour() != 0xbc614e) {
-						GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour());
-					} else if(Options.showHiddenTiles.get()){
-						GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								GameRasterizer.getInstance().getFuchsia(), 	GameRasterizer.getInstance().getFuchsia(), 	GameRasterizer.getInstance().getFuchsia());
-					}
-				} else if (!lowMemory) {
-					if (tile.isFlat()) {
-						GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xA, xB, xC,
-								centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
-					} else {
-						GameRasterizer.getInstance().drawTexturedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-								tile.getNorthEastColour(), tile.getNorthColour(), tile.getEastColour(), xD, xC, xB,
-								northEastHeight, northHeight, eastHeight, yD, yC, yB, tile.getTexture());
-					}
-				} else {
-					int textureColour = TEXTURE_COLOURS[tile.getTexture()];
-					GameRasterizer.getInstance().drawShadedTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
-							light(textureColour, tile.getNorthEastColour()), light(textureColour, tile.getNorthColour()),
-							light(textureColour, tile.getEastColour()));
-				}
+				int textureColour = TEXTURE_COLOURS[tile.getTexture()];
+				GameRasterizer.getInstance().drawGouraudTriangle(screenYD, screenYC, screenYB, screenXD, screenXC, screenXB,
+						light(textureColour, tile.getNorthEastColour()), light(textureColour, tile.getNorthColour()),
+						light(textureColour, tile.getEastColour()));
 			}
-			// Rasterizer.drawRectangle(screen, y, screenXC, height, colour);
 		}
 
 		if ((screenXA - screenXB) * (screenYC - screenYB) - (screenYA - screenYB) * (screenXC - screenXB) > 0) {
@@ -3632,40 +3560,32 @@ public class SceneGraph {
 			}
 			if (hiddenTile) {
 				GameRasterizer.getInstance().currentAlpha = 170;
-				GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+				GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 						tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour());
 				GameRasterizer.getInstance().currentAlpha = 0;
 			} else if (tile.getTexture() == -1) {
 				if (tile.getCentreColour() != 0xbc614e) {
-					GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 							tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour());
 				} else if(Options.showHiddenTiles.get()){
-					GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 							GameRasterizer.getInstance().getFuchsia(), 	GameRasterizer.getInstance().getFuchsia(), 	GameRasterizer.getInstance().getFuchsia());
 
 				}
 			} else {
 				if (!lowMemory) {
-					if (Options.hdTextures.get() && tile.getCentreColour() != 0xbc614e) {
-
-						GameRasterizer.getInstance().render_texture_triangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
-								yA, yB, yC,
-								tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour(), xA, xB, xC,
-								centreHeight, eastHeight, northHeight, yA, yB, yC, !lowMemory || tile.getTileColour() == -1 ? tile.getTexture() : -1, tile.getColour(), true, true);
-					} else if (tile.getCentreColour() != 0xbc614e) {
+					if (tile.getCentreColour() != 0xbc614e) {
 						GameRasterizer.getInstance().drawTexturedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 								tile.getCentreColour(), tile.getEastColour(), tile.getNorthColour(), xA, xB, xC,
 								centreHeight, eastHeight, northHeight, yA, yB, yC, tile.getTexture());
 					}
-				} else if (!Options.hdTextures.get()) {
+				} else {
 					int j7 = TEXTURE_COLOURS[tile.getTexture()];
-					GameRasterizer.getInstance().drawShadedTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
+					GameRasterizer.getInstance().drawGouraudTriangle(screenYA, screenYB, screenYC, screenXA, screenXB, screenXC,
 							light(j7, tile.getCentreColour()), light(j7, tile.getEastColour()),
 							light(j7, tile.getNorthColour()));
-
 				}
 			}
-
 		}
 
 
@@ -3740,70 +3660,33 @@ public class SceneGraph {
 					handleMouseInTile(tileX, tileY, plane);
 				}
 
-				if (Options.hdTextures.get()) {
-					if (tile.getTriangleTexture() == null || tile.getTriangleTexture()[triangleIndex] == -1) {
-						if (tile.getTriangleHslA()[triangleIndex] != 0xbc614e) {
-							GameRasterizer.getInstance().drawShadedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
-									tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
-									tile.getTriangleHslC()[triangleIndex]);
-						}
-					} else if (!lowMemory) {
-						if (tile.isFlat()) {
-							GameRasterizer.getInstance().render_texture_triangle(sYA, sYB, sYC, sXA, sXB, sXC, sZA, sZB, sZC,
-									tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
-									tile.getTriangleHslC()[triangleIndex],
-									ShapedTile.viewSpaceX[0], ShapedTile.viewSpaceX[1],
-									ShapedTile.viewSpaceX[3], ShapedTile.viewSpaceY[0],
-									ShapedTile.viewSpaceY[1], ShapedTile.viewSpaceY[3],
-									ShapedTile.viewSpaceZ[0], ShapedTile.viewSpaceZ[1],
-									ShapedTile.viewSpaceZ[3],
-									!lowMemory || tile.displayColor[triangleIndex] == -1 ? tile.getTriangleTexture()[triangleIndex] : -1, tile.displayColor[triangleIndex], true, true);
-						} else {
-							GameRasterizer.getInstance().render_texture_triangle(sYA, sYB, sYC, sXA, sXB, sXC, sZA, sZB, sZC,
-									tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
-									tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[indexA],
-									ShapedTile.viewSpaceX[indexB], ShapedTile.viewSpaceX[indexC],
-									ShapedTile.viewSpaceY[indexA], ShapedTile.viewSpaceY[indexB],
-									ShapedTile.viewSpaceY[indexC], ShapedTile.viewSpaceZ[indexA],
-									ShapedTile.viewSpaceZ[indexB], ShapedTile.viewSpaceZ[indexC],
-									!lowMemory || tile.displayColor[triangleIndex] == -1 ? tile.getTriangleTexture()[triangleIndex] : -1, tile.displayColor[triangleIndex], true, true);
-						}
+				if (tile.getTriangleTexture() == null || tile.getTriangleTexture()[triangleIndex] == -1) {
+					if (tile.getTriangleHslA()[triangleIndex] != 0xbc614e) {
+						GameRasterizer.getInstance().drawGouraudTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
+								tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
+								tile.getTriangleHslC()[triangleIndex]);
 					}
-				} else {
-					if (tile.getTriangleTexture() == null || tile.getTriangleTexture()[triangleIndex] == -1) {
-						if (tile.getTriangleHslA()[triangleIndex] != 0xbc614e) {
-							GameRasterizer.getInstance().drawShadedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
-									tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
-									tile.getTriangleHslC()[triangleIndex]);
-						}
-					} else if (!lowMemory) {
-						if (tile.isFlat()) {
-							GameRasterizer.getInstance().drawTexturedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
-									tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
-									tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[0],
-									ShapedTile.viewSpaceX[1], ShapedTile.viewSpaceX[3], ShapedTile.viewSpaceY[0],
-									ShapedTile.viewSpaceY[1], ShapedTile.viewSpaceY[3], ShapedTile.viewSpaceZ[0],
-									ShapedTile.viewSpaceZ[1], ShapedTile.viewSpaceZ[3],
-									tile.getTriangleTexture()[triangleIndex]);
-						} else {
-							GameRasterizer.getInstance().drawTexturedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
-									tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
-									tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[indexA],
-									ShapedTile.viewSpaceX[indexB], ShapedTile.viewSpaceX[indexC],
-									ShapedTile.viewSpaceY[indexA], ShapedTile.viewSpaceY[indexB],
-									ShapedTile.viewSpaceY[indexC], ShapedTile.viewSpaceZ[indexA],
-									ShapedTile.viewSpaceZ[indexB], ShapedTile.viewSpaceZ[indexC],
-									tile.getTriangleTexture()[triangleIndex]);
-						}
+				} else if (!lowMemory) {
+					if (tile.isFlat()) {
+						GameRasterizer.getInstance().drawTexturedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
+								tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
+								tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[0],
+								ShapedTile.viewSpaceX[1], ShapedTile.viewSpaceX[3], ShapedTile.viewSpaceY[0],
+								ShapedTile.viewSpaceY[1], ShapedTile.viewSpaceY[3], ShapedTile.viewSpaceZ[0],
+								ShapedTile.viewSpaceZ[1], ShapedTile.viewSpaceZ[3],
+								tile.getTriangleTexture()[triangleIndex]);
+					} else {
+						GameRasterizer.getInstance().drawTexturedTriangle(sYA, sYB, sYC, sXA, sXB, sXC,
+								tile.getTriangleHslA()[triangleIndex], tile.getTriangleHslB()[triangleIndex],
+								tile.getTriangleHslC()[triangleIndex], ShapedTile.viewSpaceX[indexA],
+								ShapedTile.viewSpaceX[indexB], ShapedTile.viewSpaceX[indexC],
+								ShapedTile.viewSpaceY[indexA], ShapedTile.viewSpaceY[indexB],
+								ShapedTile.viewSpaceY[indexC], ShapedTile.viewSpaceZ[indexA],
+								ShapedTile.viewSpaceZ[indexB], ShapedTile.viewSpaceZ[indexC],
+								tile.getTriangleTexture()[triangleIndex]);
 					}
 				}
 			}
-
-			/*
-			 * if(tileX == clickedTileX && tileZ == clickedTileY){ Rasterizer.currentAlpha =
-			 * 139; Rasterizer.drawPlainTriangle(sYA, sYB, sYC, sXA, sXB, sXC, 0xff80 + 127,
-			 * 0xff80 + 127, 0xff80 + 127); }
-			 */
 		}
 		if (highlight || tileSelected || tileBeingSelected) {
 			GameRasterizer.getInstance().currentAlpha = 139;

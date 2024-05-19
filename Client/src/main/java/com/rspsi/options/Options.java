@@ -60,8 +60,6 @@ public class Options {
 	public static IntegerProperty overlayPaintShapeId = new SimpleIntegerProperty(1);
 	public static IntegerProperty underlayPaintId = new SimpleIntegerProperty(0);
 	public static ObjectProperty<BrushType> brushType = new SimpleObjectProperty<BrushType>(BrushType.RECTANGLE);
-	
-	public static BooleanProperty hdTextures = new SimpleBooleanProperty(false);
 
 	public static List<SceneTileData> importData = Lists.newArrayList();
 

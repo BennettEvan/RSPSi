@@ -187,8 +187,7 @@ public final class ShapedTile {
 			int centreZ, int type, int northOverColour, int eastOverColour, int eastUnderColour, int x,
 			int textureColour, int underlay_texture,
 			   int underlay_color, boolean tex) {
-		
-		boolean hdTextures = Options.hdTextures.get();
+
 		textured = tex;
 		color61 = centerUnderColour;
 		color71 = eastUnderColour;
@@ -383,19 +382,8 @@ public final class ShapedTile {
 				triangleHslA[j8] = vertexColourOverlay[k9];
 				triangleHslB[j8] = vertexColourOverlay[i10];
 				triangleHslC[j8] = vertexColourOverlay[k10];
-				if(hdTextures) {
-
-					if (triangleTexture != null) {
-						triangleTexture[j8] = underlay_texture;
-					}
-					
-					if (displayColor != null) {
-						displayColor[j8] = underlay_color;
-					}
-				} else {
-					if (triangleTexture != null) {
-						triangleTexture[j8] = -1;
-					}
+				if (triangleTexture != null) {
+					triangleTexture[j8] = -1;
 				}
 			} else {
 				triangleHslA[j8] = vertexColourUnderlay[k9];
@@ -433,7 +421,6 @@ public final class ShapedTile {
 
 		i9 /= 14;
 		l9 /= 14;
-		textured = !hdTextures || tex;
 	}
 
 	public int getOrientation() {

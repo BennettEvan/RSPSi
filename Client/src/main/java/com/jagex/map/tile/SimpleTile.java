@@ -1,7 +1,5 @@
 package com.jagex.map.tile;
 
-
-
 import com.rspsi.options.Options;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,8 +21,7 @@ public final class SimpleTile {
 	public boolean textured;
 	int colour;
 
-	public SimpleTile(int centreColour, int eastColour, int northEastColour, int northColour, int texture,
-			int tileColour, boolean flat, int colour, boolean tex) {
+	public SimpleTile(int centreColour, int eastColour, int northEastColour, int northColour, int texture, int tileColour, boolean flat, int colour, boolean tex) {
 		this.centreColour = centreColour;
 		this.eastColour = eastColour;
 		this.northEastColour = northEastColour;
@@ -33,12 +30,6 @@ public final class SimpleTile {
 		this.tileColour = tileColour;
 		this.flat = flat;
 		this.colour = colour;
-		
 		this.textured = tex;
-		int cheapHax = texture;
-		if(Options.hdTextures.get())
-			cheapHax = -1;
-		textured = cheapHax != -1;
 	}
-
 }

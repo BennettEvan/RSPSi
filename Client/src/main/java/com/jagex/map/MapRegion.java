@@ -847,53 +847,13 @@ public final class MapRegion {
 								}
 
 								if (overlayFloorId == 0) {
-									if (Options.hdTextures.get()) {
-										if (underlay - 1 >= FloorDefinitionLoader.getUnderlayCount()) {
-											underlay = FloorDefinitionLoader.getUnderlayCount();
-										}
-										Floor floor = FloorDefinitionLoader.getUnderlay(underlay - 1);
-										if(floor == null)
-											continue;
-										int underlay_texture_id = floor.getTexture();
-										if (underlay_texture_id != -1) {
-											underlay_texture_id = 154; // 632, 154
-										}
-										underlay_floor_texture = underlay_texture_id;
-										underlay_floor_map_color = ColourUtils.checkedLight(hsl_bitset_unmodified, 96);
-										int tile_opcode = overlayShapes[z][centreX][centreY] + 1;
-										if (tile_opcode == 1) {
-											tile_opcode = 434;
-										}
-										byte tile_orientation = overlayShapes[z][centreX][centreY];
-										/**
-										 * Adds underlay tile
-										 */
-										int overlay_hsl = ColourUtils.toHsl(floor.getHue(), floor.getSaturation(),
-												floor.getLuminance());
-
-										byte flag = tileFlags[z][centreX][centreY];
-										scene.addTile(z, centreX, centreY, tile_opcode, tile_orientation,
-												underlay_texture_id, centreHeight, eastHeight, northEastHeight,
-												northHeight, light(hsl_bitset_unmodified, centreLight),
-												light(hsl_bitset_unmodified, eastLight),
-												light(hsl_bitset_unmodified, northEastLight),
-												light(hsl_bitset_unmodified, northLight),
-												getOverlayShadow(overlay_hsl, centreLight),
-												getOverlayShadow(overlay_hsl, eastLight),
-												getOverlayShadow(overlay_hsl, northEastLight),
-												getOverlayShadow(overlay_hsl, northLight), rgb_bitset_randomized,
-												rgb_bitset_randomized, underlay_floor_map_color, underlay_floor_texture,
-												underlay_floor_map_color, false, flag, underlay - 1, overlayFloorId - 1);
-									} else {
-										byte flag = tileFlags[z][centreX][centreY];
-										scene.addTile(z, centreX, centreY, 0, 0, -1, centreHeight, eastHeight,
-												northEastHeight, northHeight, light(hsl_bitset_unmodified, centreLight),
-												light(hsl_bitset_unmodified, eastLight),
-												light(hsl_bitset_unmodified, northEastLight),
-												light(hsl_bitset_unmodified, northLight), 0, 0, 0, 0,
-												rgb_bitset_randomized, rgb_bitset_randomized, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
-									}
-
+									byte flag = tileFlags[z][centreX][centreY];
+									scene.addTile(z, centreX, centreY, 0, 0, -1, centreHeight, eastHeight,
+											northEastHeight, northHeight, light(hsl_bitset_unmodified, centreLight),
+											light(hsl_bitset_unmodified, eastLight),
+											light(hsl_bitset_unmodified, northEastLight),
+											light(hsl_bitset_unmodified, northLight), 0, 0, 0, 0,
+											rgb_bitset_randomized, rgb_bitset_randomized, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
 								} else {
 									int tileType = overlayShapes[z][centreX][centreY] + 1;
 									byte orientation = overlayOrientations[z][centreX][centreY];
@@ -949,111 +909,18 @@ public final class MapRegion {
 
 									}
 
-									/*
-									 * if (overlayRgbColour == 0x000000 && floor.getAnotherRgb() != -1) {
-									 * 
-									 * int newOverlayColour = ColourUtils.toHsl(floor.getAnotherHue(),
-									 * floor.getAnotherSaturation(), floor.getAnotherLuminance()); overlayRgbColour
-									 * = GameRasterizer.getInstance().colourPalette[ColourUtils.checkedLight(
-									 * newOverlayColour, 96)];
-									 * 
-									 * }
-									 */
-
-									/*if ((overlayFloorId - 1) == 54) {
-										overlayRgbColour = 0x8B8B83;
-										overlayHslColour = -2;
-									}
-									if ((overlayFloorId - 1) == 111) {
-										overlayRgbColour = TextureLoader.getTexture(1).averageTextureColour();
-										overlayHslColour = -1;// method177(150,100,100);
-										overlayTextureId = 1;
-									} else if (overlayHslColour == 6363) { // river bank (brown shit) 508
-										overlayRgbColour = 0x483B21;
-										overlayHslColour = ColourUtils.toHsl(25, 146, 24);
-									}
-										 * else if((overlayFloorId-1) == 54){ overlayRgbColour =
-										 * overlayFloor.getColour(); overlayHslColour = -2; overlayTextureId = -1; }
-										 */
-
-									if (Options.hdTextures.get()) {
-
-										if (overlayFloor.getAnotherRgb() != -1) {
-											overlayMapColour = (GameRasterizer.getInstance().colourPalette[overlayFloor
-													.getAnotherRgb()] != 1)
-															? GameRasterizer.getInstance().colourPalette[overlayFloor
-																	.getAnotherRgb()]
-															: 0;
-										}
-										if ((overlayTextureId >= 0)) {
-											overlayHslColour = -1;
-											if (overlayFloor.getRgb() != 0xff00ff) {
-												overlayHslColour = overlayFloor.getRgb();
-												if (overlayTextureId > TextureLoader.instance.count()) {
-													overlayRgbColour = (overlayHslColour != -1
-															? GameRasterizer
-																	.getInstance().colourPalette[overlayHslColour]
-															: 0);
-												}
-												overlayTextureColour = getOverlayShadow(overlayFloor.getRgb(), 96);
-											} else {
-												if (overlayTextureId > TextureLoader.instance.count()) {
-													overlayRgbColour = overlayFloor.getAnotherRgb();
-												}
-												overlayHslColour = -2;
-												underlay_floor_map_color = -1;
-												overlayTextureColour = -1;
-											}
-										} else if (overlayFloor.getRgb() == -1) {
-											if (overlayTextureId > TextureLoader.instance.count()) {
-												overlayRgbColour = overlayMapColour;
-											}
-											overlayHslColour = -2;
-											// ?
-											if (z > 0) {
-												underlay_floor_texture = -1;
-											}
-
-											overlayTextureId = -1;
-										} else {
-											overlayTextureColour = getOverlayShadow(overlayFloor.getRgb(), 96);
-											overlayHslColour = overlayFloor.getRgb();
-											if (overlayTextureId > TextureLoader.instance.count()) {
-												overlayRgbColour = GameRasterizer
-														.getInstance().colourPalette[overlayTextureColour];
-											}
-										}
-									}
-
-									if (Options.hdTextures.get()) {
-										byte flag = tileFlags[z][centreX][centreY];
-										scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
-												centreHeight, eastHeight, northEastHeight, northHeight,
-												light(hsl_bitset_unmodified, centreLight),
-												light(hsl_bitset_unmodified, eastLight),
-												light(hsl_bitset_unmodified, northEastLight),
-												light(hsl_bitset_unmodified, northLight),
-												getOverlayShadow(overlayHslColour, centreLight),
-												getOverlayShadow(overlayHslColour, eastLight),
-												getOverlayShadow(overlayHslColour, northEastLight),
-												getOverlayShadow(overlayHslColour, northLight), rgb_bitset_randomized,
-												overlayRgbColour, overlayTextureColour, underlay_floor_texture,
-												underlay_floor_map_color, false, flag, underlay - 1, overlayFloorId - 1);
-									} else {
-										byte flag = tileFlags[z][centreX][centreY];
-										scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
-												centreHeight, eastHeight, northEastHeight, northHeight,
-												light(hsl_bitset_unmodified, centreLight),
-												light(hsl_bitset_unmodified, eastLight),
-												light(hsl_bitset_unmodified, northEastLight),
-												light(hsl_bitset_unmodified, northLight),
-												ColourUtils.checkedLight(overlayHslColour, centreLight),
-												ColourUtils.checkedLight(overlayHslColour, eastLight),
-												ColourUtils.checkedLight(overlayHslColour, northEastLight),
-												ColourUtils.checkedLight(overlayHslColour, northLight),
-												rgb_bitset_randomized, overlayRgbColour, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
-									}
-
+									byte flag = tileFlags[z][centreX][centreY];
+									scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
+											centreHeight, eastHeight, northEastHeight, northHeight,
+											light(hsl_bitset_unmodified, centreLight),
+											light(hsl_bitset_unmodified, eastLight),
+											light(hsl_bitset_unmodified, northEastLight),
+											light(hsl_bitset_unmodified, northLight),
+											ColourUtils.checkedLight(overlayHslColour, centreLight),
+											ColourUtils.checkedLight(overlayHslColour, eastLight),
+											ColourUtils.checkedLight(overlayHslColour, northEastLight),
+											ColourUtils.checkedLight(overlayHslColour, northLight),
+											rgb_bitset_randomized, overlayRgbColour, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
 								}
 							}
 						}
@@ -1817,61 +1684,19 @@ public final class MapRegion {
 
 									if (overlayFloorId == 0 || hideOverlays) {
 										byte flag = tileFlags[z][centreX][centreY];
-										/*
-										 * if(underlay == 0 && overlayFloorId == 0 && hiddenHL) { flag |= 64; }
-										 */
-										if (Options.hdTextures.get()) {
-											if (underlay - 1 >= FloorDefinitionLoader.getUnderlayCount()) {
-												underlay = FloorDefinitionLoader.getUnderlayCount();
-											}
-											Floor floor = FloorDefinitionLoader.getUnderlay(underlay - 1);
-											int underlay_texture_id = floor.getTexture();
-											if (underlay_texture_id != -1) {
-												underlay_texture_id = 154; // 632, 154
-											}
-											underlay_floor_texture = underlay_texture_id;
-											underlay_floor_map_color = ColourUtils.checkedLight(hsl_bitset_unmodified,
-													96);
-											int tile_opcode = overlayShapes[z][centreX][centreY] + 1;
-
-											byte tile_orientation = overlayShapes[z][centreX][centreY];
-											/**
-											 * Adds underlay tile
-											 */
-											int overlay_hsl = ColourUtils.toHsl(floor.getHue(), floor.getSaturation(),
-													floor.getLuminance());
-
-											scene.addTile(z, centreX, centreY, tile_opcode, tile_orientation,
-													underlay_texture_id, centreHeight, eastHeight, northEastHeight,
-													northHeight, light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight),
-													getOverlayShadow(overlay_hsl, centreLight),
-													getOverlayShadow(overlay_hsl, eastLight),
-													getOverlayShadow(overlay_hsl, northEastLight),
-													getOverlayShadow(overlay_hsl, northLight), rgb_bitset_randomized,
-													rgb_bitset_randomized, underlay_floor_map_color,
-													underlay_floor_texture, underlay_floor_map_color, false, flag, underlay - 1, overlayFloorId - 1);
-										} else {
-											scene.addTile(z, centreX, centreY, 0, 0, -1, centreHeight, eastHeight,
-													northEastHeight, northHeight,
-													light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight), 0, 0, 0, 0,
-													rgb_bitset_randomized, rgb_bitset_randomized, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
-										}
-
+										scene.addTile(z, centreX, centreY, 0, 0, -1, centreHeight, eastHeight,
+												northEastHeight, northHeight,
+												light(hsl_bitset_unmodified, centreLight),
+												light(hsl_bitset_unmodified, eastLight),
+												light(hsl_bitset_unmodified, northEastLight),
+												light(hsl_bitset_unmodified, northLight), 0, 0, 0, 0,
+												rgb_bitset_randomized, rgb_bitset_randomized, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
 									} else {
 										int tileType = overlayShapes[z][centreX][centreY] + 1;
 										byte orientation = overlayOrientations[z][centreX][centreY];
 
 										Floor overlayFloor = FloorDefinitionLoader.getOverlay(overlayFloorId - 1);
 										int overlayTextureId = overlayFloor.getTexture();
-
-										int overlayTextureColour = -1;
-										int overlayMapColour = 0;
 
 										int overlayHslColour;
 										int overlayRgbColour;
@@ -1884,8 +1709,7 @@ public final class MapRegion {
 											overlayTextureId = -1;
 										}
 										if (overlayTextureId >= 0) {
-											overlayRgbColour = TextureLoader.getTexture(overlayTextureId)
-													.averageTextureColour();
+											overlayRgbColour = TextureLoader.getTexture(overlayTextureId).averageTextureColour();
 											overlayHslColour = -1;
 										} else if (overlayFloor.getRgb() == 0xff00ff) { // transparent
 											overlayRgbColour = 0;
@@ -1903,97 +1727,18 @@ public final class MapRegion {
 													.checkedLight(overlayFloor.getColour(), 96)];
 										}
 
-										/*
-										 * if (overlayRgbColour == 0x000000 && floor.getAnotherRgb() != -1) {
-										 * 
-										 * int newOverlayColour = ColourUtils.toHsl(floor.getAnotherHue(),
-										 * floor.getAnotherSaturation(), floor.getAnotherLuminance()); overlayRgbColour
-										 * = GameRasterizer.getInstance().colourPalette[ColourUtils.checkedLight(
-										 * newOverlayColour, 96)];
-										 * 
-										 * }
-										 */
-
-
-										if (Options.hdTextures.get()) {
-
-											if (overlayFloor.getAnotherRgb() != -1) {
-												overlayMapColour = (GameRasterizer
-														.getInstance().colourPalette[overlayFloor.getAnotherRgb()] != 1)
-																? GameRasterizer
-																		.getInstance().colourPalette[overlayFloor
-																				.getAnotherRgb()]
-																: 0;
-											}
-											if ((overlayTextureId >= 0)) {
-												overlayHslColour = -1;
-												if (overlayFloor.getRgb() != 0xff00ff) {
-													overlayHslColour = overlayFloor.getRgb();
-													if (overlayTextureId > TextureLoader.instance.count()) {
-														overlayRgbColour = (overlayHslColour != -1
-																? GameRasterizer
-																		.getInstance().colourPalette[overlayHslColour]
-																: 0);
-													}
-													overlayTextureColour = getOverlayShadow(overlayFloor.getRgb(), 96);
-												} else {
-													if (overlayTextureId > TextureLoader.instance.count()) {
-														overlayRgbColour = overlayFloor.getAnotherRgb();
-													}
-													overlayHslColour = -2;
-													underlay_floor_map_color = -1;
-													overlayTextureColour = -1;
-												}
-											} else if (overlayFloor.getRgb() == -1) {
-												if (overlayTextureId > TextureLoader.instance.count()) {
-													overlayRgbColour = overlayMapColour;
-												}
-												overlayHslColour = -2;
-												// ?
-												if (z > 0) {
-													underlay_floor_texture = -1;
-												}
-
-												overlayTextureId = -1;
-											} else {
-												overlayTextureColour = getOverlayShadow(overlayFloor.getRgb(), 96);
-												overlayHslColour = overlayFloor.getRgb();
-												if (overlayTextureId > TextureLoader.instance.count()) {
-													overlayRgbColour = GameRasterizer
-															.getInstance().colourPalette[overlayTextureColour];
-												}
-											}
-										}
-
-										if (Options.hdTextures.get()) {
-											byte flag = tileFlags[z][centreX][centreY];
-											scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
-													centreHeight, eastHeight, northEastHeight, northHeight,
-													light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight),
-													getOverlayShadow(overlayHslColour, centreLight),
-													getOverlayShadow(overlayHslColour, eastLight),
-													getOverlayShadow(overlayHslColour, northEastLight),
-													getOverlayShadow(overlayHslColour, northLight),
-													rgb_bitset_randomized, overlayRgbColour, overlayTextureColour,
-													underlay_floor_texture, underlay_floor_map_color, false, flag, underlay - 1, overlayFloorId - 1);
-										} else {
-											byte flag = tileFlags[z][centreX][centreY];
-											scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
-													centreHeight, eastHeight, northEastHeight, northHeight,
-													light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight),
-													getOverlayShadow(overlayHslColour, centreLight),
-													getOverlayShadow(overlayHslColour, eastLight),
-													getOverlayShadow(overlayHslColour, northEastLight),
-													getOverlayShadow(overlayHslColour, northLight),
-													rgb_bitset_randomized, overlayRgbColour, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
-										}
-
+										byte flag = tileFlags[z][centreX][centreY];
+										scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
+												centreHeight, eastHeight, northEastHeight, northHeight,
+												light(hsl_bitset_unmodified, centreLight),
+												light(hsl_bitset_unmodified, eastLight),
+												light(hsl_bitset_unmodified, northEastLight),
+												light(hsl_bitset_unmodified, northLight),
+												getOverlayShadow(overlayHslColour, centreLight),
+												getOverlayShadow(overlayHslColour, eastLight),
+												getOverlayShadow(overlayHslColour, northEastLight),
+												getOverlayShadow(overlayHslColour, northLight),
+												rgb_bitset_randomized, overlayRgbColour, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
 									}
 								} else {
 									scene.getTile(z, centreX, centreY).simple = null;
@@ -2223,52 +1968,13 @@ public final class MapRegion {
 
 									if (overlayFloorId == 0 || hideOverlays) {
 										byte flag = tileFlags[z][centreX][centreY];
-										/*
-										 * if(underlay == 0 && overlayFloorId == 0 && hiddenHL) { flag |= 64; }
-										 */
-										if (Options.hdTextures.get()) {
-											if (underlay - 1 >= FloorDefinitionLoader.getUnderlayCount()) {
-												underlay = FloorDefinitionLoader.getUnderlayCount();
-											}
-											Floor floor = FloorDefinitionLoader.getUnderlay(underlay - 1);
-											int underlay_texture_id = floor.getTexture();
-											if (underlay_texture_id != -1) {
-												underlay_texture_id = 154; // 632, 154
-											}
-											underlay_floor_texture = underlay_texture_id;
-											underlay_floor_map_color = ColourUtils.checkedLight(hsl_bitset_unmodified,
-													96);
-											int tile_opcode = overlayShapes[z][centreX][centreY] + 1;
-
-											byte tile_orientation = overlayShapes[z][centreX][centreY];
-											/**
-											 * Adds underlay tile
-											 */
-											int overlay_hsl = ColourUtils.toHsl(floor.getHue(), floor.getSaturation(),
-													floor.getLuminance());
-
-											scene.addTile(z, centreX, centreY, tile_opcode, tile_orientation,
-													underlay_texture_id, centreHeight, eastHeight, northEastHeight,
-													northHeight, light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight),
-													getOverlayShadow(overlay_hsl, centreLight),
-													getOverlayShadow(overlay_hsl, eastLight),
-													getOverlayShadow(overlay_hsl, northEastLight),
-													getOverlayShadow(overlay_hsl, northLight), rgb_bitset_randomized,
-													rgb_bitset_randomized, underlay_floor_map_color,
-													underlay_floor_texture, underlay_floor_map_color, false, flag, underlay - 1, overlayFloorId - 1);
-										} else {
-											scene.addTile(z, centreX, centreY, 0, 0, -1, centreHeight, eastHeight,
-													northEastHeight, northHeight,
-													light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight), 0, 0, 0, 0,
-													rgb_bitset_randomized, rgb_bitset_randomized, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
-										}
-
+										scene.addTile(z, centreX, centreY, 0, 0, -1, centreHeight, eastHeight,
+												northEastHeight, northHeight,
+												light(hsl_bitset_unmodified, centreLight),
+												light(hsl_bitset_unmodified, eastLight),
+												light(hsl_bitset_unmodified, northEastLight),
+												light(hsl_bitset_unmodified, northLight), 0, 0, 0, 0,
+												rgb_bitset_randomized, rgb_bitset_randomized, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
 									} else {
 										int tileType = overlayShapes[z][centreX][centreY] + 1;
 										byte orientation = overlayOrientations[z][centreX][centreY];
@@ -2309,86 +2015,18 @@ public final class MapRegion {
 													.checkedLight(overlayFloor.getColour(), 96)];
 										}
 
-
-										if (Options.hdTextures.get()) {
-
-											if (overlayFloor.getAnotherRgb() != -1) {
-												overlayMapColour = (GameRasterizer
-														.getInstance().colourPalette[overlayFloor.getAnotherRgb()] != 1)
-																? GameRasterizer
-																		.getInstance().colourPalette[overlayFloor
-																				.getAnotherRgb()]
-																: 0;
-											}
-											if ((overlayTextureId >= 0)) {
-												overlayHslColour = -1;
-												if (overlayFloor.getRgb() != 0xff00ff) {
-													overlayHslColour = overlayFloor.getRgb();
-													if (overlayTextureId > TextureLoader.instance.count()) {
-														overlayRgbColour = (overlayHslColour != -1
-																? GameRasterizer
-																		.getInstance().colourPalette[overlayHslColour]
-																: 0);
-													}
-													overlayTextureColour = getOverlayShadow(overlayFloor.getRgb(), 96);
-												} else {
-													if (overlayTextureId > TextureLoader.instance.count()) {
-														overlayRgbColour = overlayFloor.getAnotherRgb();
-													}
-													overlayHslColour = -2;
-													underlay_floor_map_color = -1;
-													overlayTextureColour = -1;
-												}
-											} else if (overlayFloor.getRgb() == -1) {
-												if (overlayTextureId > TextureLoader.instance.count()) {
-													overlayRgbColour = overlayMapColour;
-												}
-												overlayHslColour = -2;
-												// ?
-												if (z > 0) {
-													underlay_floor_texture = -1;
-												}
-
-												overlayTextureId = -1;
-											} else {
-												overlayTextureColour = getOverlayShadow(overlayFloor.getRgb(), 96);
-												overlayHslColour = overlayFloor.getRgb();
-												if (overlayTextureId > TextureLoader.instance.count()) {
-													overlayRgbColour = GameRasterizer
-															.getInstance().colourPalette[overlayTextureColour];
-												}
-											}
-										}
-
-										if (Options.hdTextures.get()) {
-											byte flag = tileFlags[z][centreX][centreY];
-											scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
-													centreHeight, eastHeight, northEastHeight, northHeight,
-													light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight),
-													getOverlayShadow(overlayHslColour, centreLight),
-													getOverlayShadow(overlayHslColour, eastLight),
-													getOverlayShadow(overlayHslColour, northEastLight),
-													getOverlayShadow(overlayHslColour, northLight),
-													rgb_bitset_randomized, overlayRgbColour, overlayTextureColour,
-													underlay_floor_texture, underlay_floor_map_color, false, flag, underlay - 1, overlayFloorId - 1);
-										} else {
-											byte flag = tileFlags[z][centreX][centreY];
-											scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
-													centreHeight, eastHeight, northEastHeight, northHeight,
-													light(hsl_bitset_unmodified, centreLight),
-													light(hsl_bitset_unmodified, eastLight),
-													light(hsl_bitset_unmodified, northEastLight),
-													light(hsl_bitset_unmodified, northLight),
-													getOverlayShadow(overlayHslColour, centreLight),
-													getOverlayShadow(overlayHslColour, eastLight),
-													getOverlayShadow(overlayHslColour, northEastLight),
-													getOverlayShadow(overlayHslColour, northLight),
-													rgb_bitset_randomized, overlayRgbColour, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
-										}
-
+										byte flag = tileFlags[z][centreX][centreY];
+										scene.addTile(z, centreX, centreY, tileType, orientation, overlayTextureId,
+												centreHeight, eastHeight, northEastHeight, northHeight,
+												light(hsl_bitset_unmodified, centreLight),
+												light(hsl_bitset_unmodified, eastLight),
+												light(hsl_bitset_unmodified, northEastLight),
+												light(hsl_bitset_unmodified, northLight),
+												getOverlayShadow(overlayHslColour, centreLight),
+												getOverlayShadow(overlayHslColour, eastLight),
+												getOverlayShadow(overlayHslColour, northEastLight),
+												getOverlayShadow(overlayHslColour, northLight),
+												rgb_bitset_randomized, overlayRgbColour, -1, 0, 0, true, flag, underlay - 1, overlayFloorId - 1);
 									}
 								} else {
 									scene.getTile(z, centreX, centreY).simple = null;
