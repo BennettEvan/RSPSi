@@ -106,15 +106,13 @@ public class MeshOSRSType2 extends Mesh {
         if (var15 == 1)
             packedTransparencyVertexGroups = new int[var10];
 
-        if(var17 == 1){
-            for (int var51 = 0; var51 < vertexCount; ++var51)
-            {
+        if (var17 == 1) {
+            for (int var51 = 0; var51 < vertexCount; ++var51) {
                 int subgroups = var6.readUByte();
                 animayaGroups[var51] = new int[subgroups];
                 animayaScales[var51] = new int[subgroups];
 
-                for (int var53 = 0; var53 < subgroups; ++var53)
-                {
+                for (int var53 = 0; var53 < subgroups; ++var53) {
                     animayaGroups[var51][var53] = var6.readUByte();
                     animayaScales[var51][var53] = var6.readUByte();
                 }
@@ -184,15 +182,15 @@ public class MeshOSRSType2 extends Mesh {
         for (var40 = 0; var40 < var10; var40++) {
             triangleColors[var40] = var4.readUShort();
             if (var12 == 1) {
-               var41 = var5.readUByte();
-                if((var41 & 1) == 1) {
+                var41 = var5.readUByte();
+                if ((var41 & 1) == 1) {
                     this.triangleInfo[var40] = 1;
                 } else {
                     this.triangleInfo[var40] = 0;
                 }
 
-                if((var41 & 2) == 2) {
-                    this.faceTexture[var40] = (byte)(var41 >> 2);
+                if ((var41 & 2) == 2) {
+                    this.faceTexture[var40] = (byte) (var41 >> 2);
                     this.faceMaterial[var40] = this.triangleColors[var40];
                     this.triangleColors[var40] = 127;
                     if (this.faceMaterial[var40] != -1) {
@@ -274,9 +272,9 @@ public class MeshOSRSType2 extends Mesh {
 
         for (var44 = 0; var44 < var11; ++var44) {
             this.textureMap[var44] = 0;
-            this.texIndices1[var44] = (short)var4.readUShort();
-            this.texIndices2[var44] = (short)var4.readUShort();
-            this.texIndices3[var44] = (short)var4.readUShort();
+            this.texIndices1[var44] = (short) var4.readUShort();
+            this.texIndices2[var44] = (short) var4.readUShort();
+            this.texIndices3[var44] = (short) var4.readUShort();
         }
 
         if (this.faceTexture != null) {
