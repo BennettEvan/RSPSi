@@ -3,24 +3,18 @@ package com.rspsi.controls;
 import java.awt.Color;
 import java.io.IOException;
 
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
 import com.jagex.Client;
-import com.jagex.cache.def.ObjectDefinition;
-import com.jagex.cache.graphics.Sprite;
-import com.jagex.cache.loader.object.ObjectDefinitionLoader;
 import com.jagex.draw.ImageGraphicsBuffer;
 import com.jagex.draw.raster.GameRasterizer;
 import com.jagex.entity.model.Mesh;
 import com.jagex.entity.model.MeshLoader;
 import com.jagex.entity.model.PreviewModel;
-import com.rspsi.datasets.ObjectDataset;
 import com.rspsi.game.CanvasPane;
 import com.rspsi.game.DisplayCanvas;
 import com.rspsi.util.ChangeListenerUtil;
 import com.rspsi.util.Threads;
 
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
@@ -118,7 +112,7 @@ public class GenericModelView extends VBox {
 				ball.rotateClockwise();
 				ball.rotateClockwise();
 				try {
-					ball.light(64, 768 * 5, -50, -10, -50, true);
+					ball.light(64, 768 * 5, -50, -10, -50);
 				} catch(Exception ex) {
 					//hmm...
 				}
@@ -129,7 +123,7 @@ public class GenericModelView extends VBox {
 				model.rotateClockwise();
 				model.rotateClockwise();
 				try {
-					model.light(64, 768 * 5, -50, -10, -50, true);
+					model.light(64, 768 * 5, -50, -10, -50);
 				} catch(Exception ex) {
 					//hmm...
 				}
@@ -165,7 +159,7 @@ public class GenericModelView extends VBox {
 			}
 			model = new PreviewModel(m);
 
-			model.light(64, 768, -50, -10, -50, true);
+			model.light(64, 768, -50, -10, -50);
 			renderModel();
 		};
 		loadModel.run();

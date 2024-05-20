@@ -148,13 +148,13 @@ public class ObjectDefinitionLoaderOSRS extends ObjectDefinitionLoader {
 				definition.setReplacementColours(replacementColours);
 			} else if (opcode == 41) {
 				int count = buffer.readUByte();
-				int[] originalTex = new int[count];
-				int[] replacementTex = new int[count];
+				short[] originalTex = new short[count];
+				short[] replacementTex = new short[count];
 				for (int i = 0; i < count; i++) {
-					originalTex[i] = buffer.readUShort();
-					replacementTex[i] = buffer.readUShort();
+					originalTex[i] = (short) buffer.readUShort();
+					replacementTex[i] = (short) buffer.readUShort();
 				}
-				definition.setRetextureToFind(originalTex);
+				definition.setTextureToFind(originalTex);
 				definition.setTextureToReplace(replacementTex);
 			} else if (opcode == 60) {
 				//definition.setMinimapFunction(buffer.readUShort());
@@ -173,7 +173,7 @@ public class ObjectDefinitionLoaderOSRS extends ObjectDefinitionLoader {
 			} else if (opcode == 68) {
 				definition.setMapscene(buffer.readUShort());
 			} else if (opcode == 69) {
-				definition.setSurroundings(buffer.readUByte());//Not used in OSRS?
+				definition.setSurroundings(buffer.readUByte());
 			} else if (opcode == 70) {
 				definition.setTranslateX(buffer.readShort());
 			} else if (opcode == 71) {
@@ -217,17 +217,16 @@ public class ObjectDefinitionLoaderOSRS extends ObjectDefinitionLoader {
 				definition.setMorphisms(morphisms);
 				definition.setVarbit(varbit);
 				definition.setVarp(varp);
-			} else if (opcode == 78) {//TODO Figure out what these do in OSRS
-				//First short = ambient sound
+			} else if (opcode == 78) {
 				buffer.skip(4);
 			} else if (opcode == 79) {
 				buffer.skip(6);
 				int count = buffer.readUByte();
 				buffer.skip(2 * count);
 			} else if (opcode == 81) {
-				buffer.skip(1);//Clip type?
+				buffer.skip(1);
 			} else if (opcode == 82) {
-				definition.setAreaId(buffer.readUShort());//AreaType
+				definition.setAreaId(buffer.readUShort());
 			} else if (opcode == 89) {
 				definition.setRandomizeAnimStart(true);
 			} else if (opcode == 249) {

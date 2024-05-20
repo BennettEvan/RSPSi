@@ -3,7 +3,6 @@ package com.rspsi.controls;
 import java.awt.Color;
 import java.io.IOException;
 
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
 import com.jagex.Client;
 import com.jagex.cache.def.ObjectDefinition;
@@ -22,7 +21,6 @@ import com.rspsi.game.DisplayCanvas;
 import com.rspsi.util.ChangeListenerUtil;
 import com.rspsi.util.Threads;
 
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
@@ -121,7 +119,7 @@ public class ObjectModelView extends VBox {
 				model.rotateClockwise();
 				model.rotateClockwise();
 				try {
-					model.light(64, 768 * 5, -50, -10, -50, true);
+					model.light(64, 768 * 5, -50, -10, -50);
 				} catch(Exception ex) {
 					//hmm...
 				}

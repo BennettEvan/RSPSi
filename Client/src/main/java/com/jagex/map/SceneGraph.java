@@ -237,7 +237,7 @@ public class SceneGraph {
 		onCycleEnd.add(() -> {
 			Client.getSingleton().sceneGraph.tileQueue.clear();
 			Client.getSingleton().sceneGraph.getMapRegion().updateTiles();
-			Client.getSingleton().sceneGraph.shadeObjects(64, -50, -10, -50, 768);
+			Client.getSingleton().sceneGraph.applyLighting(-50, -10, -50);
 			minimapUpdate = true;
 		});
 	}
@@ -273,7 +273,7 @@ public class SceneGraph {
 		onCycleEnd.add(() -> {
 			Client.getSingleton().sceneGraph.tileQueue.clear();
 			Client.getSingleton().sceneGraph.getMapRegion().updateTiles();
-			Client.getSingleton().sceneGraph.shadeObjects(64, -50, -10, -50, 768);
+			Client.getSingleton().sceneGraph.applyLighting(-50, -10, -50);
 			minimapUpdate = true;
 		});
 	}
@@ -1900,7 +1900,7 @@ public class SceneGraph {
 						commitChanges();
 						Options.currentTool.set(ToolType.IMPORT_SELECTION);
 						SceneGraph.setMouseIsDown(false);
-						this.shadeObjects(64, -50, -10, -50, 768);
+						this.applyLighting(-50, -10, -50);
 
 					} else {
 						//System.out.println("Found? " + (Options.importData.stream().anyMatch(data -> data.getGroundDecoration())));
@@ -2111,7 +2111,7 @@ public class SceneGraph {
 					if (!mouseIsDown && mouseWasDown) {
 						tileQueue.clear();
 						System.out.println("MWD");
-						this.shadeObjects(64, -50, -10, -50, 768);
+						this.applyLighting(-50, -10, -50);
 						getMapRegion().updateTiles();
 						mouseWasDown = false;
 					}
@@ -2349,43 +2349,58 @@ public class SceneGraph {
 	}
 
 	private void mergeNormals(Mesh first, Mesh second, int dx, int dy, int dz, boolean flag) {
+		first.computeBounds();
+		first.calculateVertexNormals();
+		second.computeBounds();
+		second.calculateVertexNormals();
 		anInt488++;
 		int count = 0;
-		int[] secondX = second.vertexX;
-		int secondVertices = second.vertexCount;
+		int[] secondX = second.verticesX;
+		int secondVertices = second.verticesCount;
 
-		for (int vertexA = 0; vertexA < first.vertexCount; vertexA++) {
-			VertexNormal parentNormalA = first.getNormal(vertexA);
-			VertexNormal normalA = first.normals[vertexA];
+		int var9;
+		for (var9 = 0; var9 < first.verticesCount; ++var9) {
+			VertexNormal var10 = first.vertexNormals[var9];
+			if (var10.magnitude != 0) {
+				int var11 = first.verticesY[var9] - dy;
+				if (var11 <= second.minimumY) {
+					int var12 = first.verticesX[var9] - dx;
+					if (var12 >= second.minimumX && var12 <= second.maximumX) {
+						int var13 = first.verticesZ[var9] - dz;
+						if (var13 >= second.minimumZ && var13 <= second.maximumZ) {
+							for (int var14 = 0; var14 < secondVertices; ++var14) {
+								VertexNormal var15 = second.vertexNormals[var14];
+								if (var12 == secondX[var14] && var13 == second.verticesZ[var14] && var11 == second.verticesY[var14]
+										&& var15.magnitude != 0) {
+									if (first.vertexNormalsOffsets == null) {
+										first.vertexNormalsOffsets = new VertexNormal[first.verticesCount];
+									}
 
-			if (normalA.getMagnitude() != 0) {
-				int y = first.vertexY[vertexA] - dy;
-				if (y <= second.minimumY) {
-					int x = first.vertexX[vertexA] - dx;
+									if (second.vertexNormalsOffsets == null) {
+										second.vertexNormalsOffsets = new VertexNormal[secondVertices];
+									}
 
-					if (x >= second.minimumX && x <= second.maximumX) {
-						int z = first.vertexZ[vertexA] - dz;
+									VertexNormal var16 = first.vertexNormalsOffsets[var9];
+									if (var16 == null) {
+										var16 = first.vertexNormalsOffsets[var9] = new VertexNormal(var10);
+									}
 
-						if (z >= second.minimumZ && z <= second.maximumZ) {
-							for (int vertexB = 0; vertexB < secondVertices; vertexB++) {
-								VertexNormal parentNormalB = second.getNormal(vertexB);
-								VertexNormal normalB = second.normals[vertexB];
+									VertexNormal var17 = second.vertexNormalsOffsets[var14];
+									if (var17 == null) {
+										var17 = second.vertexNormalsOffsets[var14] = new VertexNormal(var15);
+									}
 
-								if (x == secondX[vertexB] && z == second.vertexZ[vertexB]
-										&& y == second.vertexY[vertexB] && normalB.getMagnitude() != 0) {
-									parentNormalA.setX(parentNormalA.getX() + normalB.getX());
-									parentNormalA.setY(parentNormalA.getY() + normalB.getY());
-									parentNormalA.setZ(parentNormalA.getZ() + normalB.getZ());
-									parentNormalA.setMagnitude(parentNormalA.getMagnitude() + normalB.getMagnitude());
-
-									parentNormalB.setX(parentNormalB.getX() + normalA.getX());
-									parentNormalB.setY(parentNormalB.getY() + normalA.getY());
-									parentNormalB.setZ(parentNormalB.getZ() + normalA.getZ());
-									parentNormalB.setMagnitude(parentNormalB.getMagnitude() + normalA.getMagnitude());
-
-									count++;
-									anIntArray486[vertexA] = anInt488;
-									anIntArray487[vertexB] = anInt488;
+									var16.x += var15.x;
+									var16.y += var15.y;
+									var16.z += var15.z;
+									var16.magnitude += var15.magnitude;
+									var17.x += var10.x;
+									var17.y += var10.y;
+									var17.z += var10.z;
+									var17.magnitude += var10.magnitude;
+									++count;
+									anIntArray486[var9] = anInt488;
+									anIntArray487[var14] = anInt488;
 								}
 							}
 						}
@@ -2394,20 +2409,28 @@ public class SceneGraph {
 			}
 		}
 
-		if (count < 3 || !flag)
-			return;
+		if (count >= 3 && flag) {
+			for (var9 = 0; var9 < first.triangleFaceCount; ++var9) {
+				if (anIntArray486[first.trianglePointsX[var9]] == anInt488
+						&& anIntArray486[first.trianglePointsY[var9]] == anInt488
+						&& anIntArray486[first.trianglePointsZ[var9]] == anInt488) {
+					if (first.faceRenderType == null) {
+						first.faceRenderType = new int[first.triangleFaceCount];
+					}
 
-		for (int k1 = 0; k1 < first.triangleCount; k1++) {
-			if (anIntArray486[first.faceIndices1[k1]] == anInt488 && anIntArray486[first.faceIndices2[k1]] == anInt488
-					&& anIntArray486[first.faceIndices3[k1]] == anInt488) {
-				first.triangleInfo[k1] = -1;
+					first.faceRenderType[var9] = 2;
+				}
 			}
-		}
 
-		for (int l1 = 0; l1 < second.triangleCount; l1++) {
-			if (anIntArray487[second.faceIndices1[l1]] == anInt488 && anIntArray487[second.faceIndices2[l1]] == anInt488
-					&& anIntArray487[second.faceIndices3[l1]] == anInt488) {
-				second.triangleInfo[l1] = -1;
+			for (var9 = 0; var9 < second.triangleFaceCount; ++var9) {
+				if (anInt488 == anIntArray487[second.trianglePointsX[var9]] && anInt488 == anIntArray487[second.trianglePointsY[var9]] && anInt488
+						== anIntArray487[second.trianglePointsZ[var9]]) {
+					if (second.faceRenderType == null) {
+						second.faceRenderType = new int[second.triangleFaceCount];
+					}
+
+					second.faceRenderType[var9] = 2;
+				}
 			}
 		}
 	}
@@ -2466,28 +2489,28 @@ public class SceneGraph {
 	private void method306(Mesh model, int x, int y, int z) {
 		if (x < width - 1) {
 			SceneTile tile = tiles[z][x + 1][y];
-			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.primaryHasNormals()) {
+			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.getPrimary() instanceof Mesh) {
 				mergeNormals(model, tile.groundDecoration.getPrimary().asMesh(), 128, 0, 0, true);
 			}
 		}
 
 		if (y < length - 1) {
 			SceneTile tile = tiles[z][x][y + 1];
-			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.primaryHasNormals()) {
+			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.getPrimary() instanceof Mesh) {
 				mergeNormals(model, tile.groundDecoration.getPrimary().asMesh(), 0, 0, 128, true);
 			}
 		}
 
 		if (x < width - 1 && y < length - 1) {
 			SceneTile tile = tiles[z][x + 1][y + 1];
-			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.primaryHasNormals()) {
+			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.getPrimary() instanceof Mesh) {
 				mergeNormals(model, tile.groundDecoration.getPrimary().asMesh(), 128, 0, 128, true);
 			}
 		}
 
 		if (x < width - 1 && y > 0) {
 			SceneTile tile = tiles[z][x + 1][y - 1];
-			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.primaryHasNormals()) {
+			if (tile != null && tile.groundDecoration != null && tile.groundDecoration.getPrimary() instanceof Mesh) {
 				mergeNormals(model, tile.groundDecoration.getPrimary().asMesh(), 128, 0, -128, true);
 			}
 		}
@@ -2519,21 +2542,21 @@ public class SceneGraph {
 
 									Wall wall = (Wall) SceneGraph.getTemporaryOrDefault(tile, WorldObjectType.WALL);
 
-									if (wall != null) {
-										if (wall.primaryHasNormals())
-											mergeNormals(model, wall.getPrimary().asMesh(), (x - startX) * 128 + (1 - sizeX) * 64,
-													averageTileHeight, (y - startY) * 128 + (1 - sizeY) * 64, flag);
+									if (wall != null && wall.getPrimary() instanceof Mesh) {
+										mergeNormals(model, wall.getPrimary().asMesh(), (x - startX) * 128 + (1 - sizeX) * 64,
+												averageTileHeight, (y - startY) * 128 + (1 - sizeY) * 64, flag);
 
-										if (wall.secondaryHasNormals())
-											mergeNormals(model, wall.getSecondary().asMesh(), (x - startX) * 128 + (1 - sizeX) * 64,
-													averageTileHeight, (y - startY) * 128 + (1 - sizeY) * 64, flag);
+									}
 
+									if (wall != null && wall.getSecondary() instanceof Mesh) {
+										mergeNormals(model, wall.getSecondary().asMesh(), (x - startX) * 128 + (1 - sizeX) * 64,
+												averageTileHeight, (y - startY) * 128 + (1 - sizeY) * 64, flag);
 									}
 
 
 									for (int index = 0; index < tile.objectCount; index++) {
 										GameObject object = tile.gameObjects[index];
-										if (object != null && object.primaryHasNormals()) {
+										if (object != null && object.getPrimary() instanceof Mesh) {
 											int k3 = object.maxX - object.getX() + 1;
 											int l3 = object.maxY - object.getY() + 1;
 											mergeNormals(model, object.getPrimary().asMesh(),
@@ -4542,93 +4565,43 @@ public class SceneGraph {
 		tiles[plane][x][y].collisionPlane = collisionPlane;
 	}
 
-	public void shadeObjects(int lighting, int drawX, int drawY, int drawZ, int l) {
-		//TODO Do this dynamically.
-		int length = (int) Math.sqrt(drawX * drawX + drawY * drawY + drawZ * drawZ);
-		int k1 = l * length >> 8;
-
-		for (int z = 0; z < planeCount; z++) {
-			for (int x = 0; x < width; x++) {
-				for (int y = 0; y < this.length; y++) {
-					SceneTile tile = tiles[z][x][y];
-
+	public void applyLighting(int i, int k, int i1) {
+		for (int l1 = 0; l1 < planeCount; l1++) {
+			for (int i2 = 0; i2 < width; i2++) {
+				for (int j2 = 0; j2 < length; j2++) {
+					SceneTile tile = tiles[l1][i2][j2];
 					if (tile != null) {
-						Wall wall = tile.wall;
+						Wall class10 = tile.wall;
 
-						if (wall != null && wall.getPrimary() != null && wall.getPrimary().hasNormals()) {
-							Mesh primary = wall.getPrimary().asMesh();
-							method307(z, 1, 1, x, y, primary);
-
-							if (wall.getSecondary() != null && wall.getSecondary().hasNormals()) {
-								Mesh secondary = wall.getSecondary().asMesh();
-								method307(z, 1, 1, x, y, secondary);
-								mergeNormals(primary, secondary, 0, 0, 0, false);
-								secondary.shade(lighting, k1, drawX, drawY, drawZ);
+						Mesh model;
+						if (class10 != null && class10.getPrimary() instanceof Mesh) {
+							Mesh rootModel = (Mesh) class10.getPrimary();
+							method307(l1, 1, 1, i2, j2, rootModel);
+							if (class10.getSecondary() instanceof Mesh) {
+								model = (Mesh) class10.getSecondary();
+								method307(l1, 1, 1, i2, j2, model);
+								mergeNormals(rootModel, model, 0, 0, 0, false);
+								model.light(model.ambient, model.contrast, k, i, i1);
 							}
-							primary.shade(lighting, k1, drawX, drawY, drawZ);
+							rootModel.light(rootModel.ambient, rootModel.contrast, k, i, i1);
 						}
-
-						for (int index = 0; index < tile.objectCount; index++) {
-							GameObject object = tile.gameObjects[index];
-
-							if (object != null && object.getPrimary() != null
-									&& object.getPrimary().hasNormals()) {
-								Mesh primary = object.getPrimary().asMesh();
-								method307(z, object.maxX - object.getX() + 1, object.maxY - object.getY() + 1, x, y, primary);
-								primary.shade(lighting, k1, drawX, drawY, drawZ);
+						for (int k2 = 0; k2 < tile.objectCount; k2++) {
+							GameObject class28 = tile.gameObjects[k2];
+							if (class28 != null && class28.getPrimary() instanceof Mesh) {
+								model = (Mesh) class28.getPrimary();
+								method307(l1, (class28.maxX - class28.getX()) + 1, (class28.maxY - class28.getY()) + 1, i2, j2, model);
+								model.light(model.ambient, model.contrast, k, i, i1);
 							}
 						}
 
-						GroundDecoration decoration = tile.groundDecoration;
-						if (decoration != null && decoration.getPrimary() != null && decoration.getPrimary().hasNormals()) {
-							Mesh primary = decoration.getPrimary().asMesh();
-							method306(primary, x, y, z);
-							primary.shade(lighting, k1, drawX, drawY, drawZ);
+						GroundDecoration class49 = tile.groundDecoration;
+						if (class49 != null && class49.getPrimary() instanceof Mesh) {
+							model = (Mesh) class49.getPrimary();
+							method306(model, i2, j2, l1);
+							model.light(model.ambient, model.contrast, k, i, i1);
 						}
 					}
 				}
-			}
-		}
-	}
-
-	public void shadeObjectsOnTile(int x, int y, int z, int lighting, int drawX, int drawY, int drawZ, int l) {
-		int length = (int) Math.sqrt(drawX * drawX + drawY * drawY + drawZ * drawZ);
-		int k1 = l * length >> 8;
-
-		SceneTile tile = tiles[z][x][y];
-
-		if (tile != null) {
-			Wall wall = tile.wall;
-
-			if (wall != null && wall.getPrimary() != null && wall.getPrimary().hasNormals()) {
-				Mesh primary = wall.getPrimary().asMesh();
-				method307(z, 1, 1, x, y, primary);
-
-				if (wall.getSecondary() != null && wall.getSecondary().hasNormals()) {
-					Mesh secondary = wall.getSecondary().asMesh();
-					method307(z, 1, 1, x, y, secondary);
-					mergeNormals(primary, secondary, 0, 0, 0, false);
-					secondary.shade(lighting, k1, drawX, drawY, drawZ);
-				}
-				primary.shade(lighting, k1, drawX, drawY, drawZ);
-			}
-
-			for (int index = 0; index < tile.objectCount; index++) {
-				GameObject object = tile.gameObjects[index];
-
-				if (object != null && object.getPrimary() != null
-						&& object.getPrimary().hasNormals()) {
-					Mesh primary = object.getPrimary().asMesh();
-					method307(z, object.maxX - object.getX() + 1, object.maxY - object.getY() + 1, x, y, primary);
-					primary.shade(lighting, k1, drawX, drawY, drawZ);
-				}
-			}
-
-			GroundDecoration decoration = tile.groundDecoration;
-			if (decoration != null && decoration.getPrimary() != null && decoration.getPrimary().hasNormals()) {
-				Mesh primary = decoration.getPrimary().asMesh();
-				method306(primary, x, y, z);
-				primary.shade(lighting, k1, drawX, drawY, drawZ);
 			}
 		}
 	}
@@ -4800,7 +4773,7 @@ public class SceneGraph {
 		getMapRegion().setHeights();//For beyond edge updates
 
 		tileQueue.clear();
-		this.shadeObjects(64, -50, -10, -50, 768);
+		this.applyLighting(-50, -10, -50);
 		getMapRegion().updateTiles();
 
 		this.updateHeights(lowestX - 3, lowestY - 3, highestX - lowestX + 3, highestY - lowestY + 3);

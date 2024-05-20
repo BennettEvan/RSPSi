@@ -1,6 +1,5 @@
 package com.jagex.cache.def;
 
-
 import java.util.Arrays;
 
 import com.jagex.Client;
@@ -20,22 +19,9 @@ import lombok.Setter;
 @Setter
 public final class ObjectDefinition {
 
-	// Thanks Super_
-
-	public static FixedIntegerKeyMap<Mesh> baseModels = new FixedIntegerKeyMap<Mesh>(500);
-	public static Client client;
-	public static boolean lowMemory;
-	public static FixedLongKeyMap<Mesh> models = new FixedLongKeyMap<Mesh>(500);
+	public static FixedIntegerKeyMap<Mesh> baseModels = new FixedIntegerKeyMap<>(500);
+	public static FixedLongKeyMap<Mesh> models = new FixedLongKeyMap<>(500);
 	private static Mesh[] parts = new Mesh[4];
-
-
-	public static void dispose() {
-		baseModels.clear();
-		models.clear();
-	}
-
-	private Sprite mapFunctionSprite, mapSceneSprite;
-
 
 	private byte ambientLighting;
 	private int animation;
@@ -64,8 +50,8 @@ public final class ObjectDefinition {
 	private boolean occludes;
 	private int[] originalColours;
 	private int[] replacementColours;
-	private int[] retextureToFind;
-	private int[] textureToReplace;
+	private short[] textureToFind;
+	private short[] textureToReplace;
 	private int scaleX;
 	private int scaleY;
 	private int scaleZ;
@@ -83,17 +69,17 @@ public final class ObjectDefinition {
 	private int areaId = -1;
 
 	public int[] getModelIds() {
-		if(modelIds != null && modelTypes != null && modelTypes[0] == 22 && modelIds[0] == 1105 && (areaId != -1 || minimapFunction != -1))
-			return new int[] {111};
+		if (modelIds != null && modelTypes != null && modelTypes[0] == 22 && modelIds[0] == 1105 && (areaId != -1 || minimapFunction != -1)) {
+			return new int[]{111};
+		}
 		return modelIds;
 	}
 
 	public String getName() {
-		return (name == null || name.equals("") ? minimapFunction != -1 ? "minimap-function:" + minimapFunction : "null" : name + ( minimapFunction != -1 ? " minimap-function:" + minimapFunction : "")) ;
+		return (name == null || name.isEmpty() ? minimapFunction != -1 ? "minimap-function:" + minimapFunction : "null" : name + ( minimapFunction != -1 ? " minimap-function:" + minimapFunction : "")) ;
 	}
 
-
-	public final void loadModels(ResourceProvider provider) {
+	public void loadModels(ResourceProvider provider) {
 		if (getModelIds() != null) {
 			for (int id : getModelIds()) {
 				provider.requestFile(CacheFileType.MODEL, id);
@@ -101,7 +87,7 @@ public final class ObjectDefinition {
 		}
 	}
 
-	private final Mesh model(int type, int frame, int orientation) {
+	private Mesh model(int type, int frame, int orientation) {
 		Mesh base = null;
 		long key;
 		if (modelTypes == null) {
@@ -134,7 +120,6 @@ public final class ObjectDefinition {
 
 					if (invert) {
 						base.invert();
-						//System.out.println("INVERTING");
 					}
 
 					baseModels.put(id, base);
@@ -185,7 +170,6 @@ public final class ObjectDefinition {
 
 				if (invert) {
 					base.invert();
-					//System.out.println("INVERTING");
 				}
 
 				baseModels.put(id, base);
@@ -195,8 +179,7 @@ public final class ObjectDefinition {
 		boolean scale = scaleX != 128 || scaleY != 128 || scaleZ != 128;
 		boolean translate = translateX != 0 || translateY != 0 || translateZ != 0;
 
-		Mesh model = new Mesh(base, originalColours == null, FrameLoader.isInvalid(frame),
-				orientation == 0 && frame == -1 && !scale && !translate, retextureToFind == null);
+		Mesh model = new Mesh(base, originalColours == null, FrameLoader.isInvalid(frame), orientation == 0 && frame == -1 && !scale && !translate, textureToFind == null);
 		if (frame != -1) {
 			model.prepareSkeleton();
 			model.apply(frame);
@@ -204,7 +187,7 @@ public final class ObjectDefinition {
 			model.vertexGroups = null;
 		}
 
-		if(type == 4 && orientation > 3) {//OSRS
+		if(type == 4 && orientation > 3) {
 			model.pitch(256);
 			model.offsetVertices(45, 0, -45);
 		}
@@ -216,16 +199,17 @@ public final class ObjectDefinition {
 		}
 
 		if (originalColours != null) {
-			for (int colour = 0; colour < originalColours.length; colour++) {
-				model.recolour(originalColours[colour], replacementColours[colour]);
+			for (int i = 0; i < originalColours.length; i++) {
+				model.recolour(originalColours[i], replacementColours[i]);
 			}
-
 		}
 
-		if(retextureToFind != null){
-			for(int index = 0;index < retextureToFind.length;index++)
-				model.retexture(retextureToFind[index], textureToReplace[index]);
+		if (textureToFind != null) {
+			for (int i = 0; i < textureToFind.length; i++) {
+				model.retexture(textureToFind[i], textureToReplace[i]);
+			}
 		}
+
 		if (scale) {
 			model.scale(scaleX, scaleZ, scaleY);
 		}
@@ -234,7 +218,7 @@ public final class ObjectDefinition {
 			model.translate(translateX, translateY, translateZ);
 		}
 
-		model.light(64 + ambientLighting, 768 + lightDiffusion * 25, -50, -10, -50, !delayShading);
+		model.light(64 + ambientLighting, 768 + lightDiffusion * 25, -50, -10, -50);
 		if (supportItems == 1) {
 			model.anInt1654 = model.getModelHeight();
 		}
@@ -242,27 +226,25 @@ public final class ObjectDefinition {
 		return model;
 	}
 
-	public final Mesh modelAt(int type, int orientation, int aY, int bY, int cY, int dY, int frameId) {
+	public Mesh modelAt(int type, int orientation, int aY, int bY, int cY, int dY, int frameId) {
 		Mesh model = model(type, frameId, orientation);
 		if (model == null) {
-
-			//System.out.println("fail1 " + type + ":" + frameId + ":" + orientation);
 			return null;
 		}
 
 		if (contouredGround || delayShading) {
-			model = new Mesh(contouredGround, delayShading, model);
+			model = new Mesh(contouredGround, model);
 		}
 
 		if (contouredGround) {
 			int y = (aY + bY + cY + dY) / 4;
-			for (int vertex = 0; vertex < model.vertexCount; vertex++) {
-				int x = model.vertexX[vertex];
-				int z = model.vertexZ[vertex];
+			for (int vertex = 0; vertex < model.verticesCount; vertex++) {
+				int x = model.verticesX[vertex];
+				int z = model.verticesZ[vertex];
 				int l2 = aY + (bY - aY) * (x + 64) / 128;
 				int i3 = dY + (cY - dY) * (x + 64) / 128;
 				int j3 = l2 + (i3 - l2) * (z + 64) / 128;
-				model.vertexY[vertex] += j3 - y;
+				model.verticesY[vertex] += j3 - y;
 			}
 
 			model.computeSphericalBounds();
@@ -278,20 +260,20 @@ public final class ObjectDefinition {
 		return occludes;
 	}
 
-	public final boolean ready() {
-		if (getModelIds() == null)
+	public boolean ready() {
+		if (getModelIds() == null) {
 			return true;
+		}
 		boolean ready = true;
 		for (int id : getModelIds()) {
 			ready &= MeshLoader.getSingleton().loaded(id);
 		}
-
 		return ready;
 	}
 
 	protected int modelTries = 0;
 
-	public final boolean readyOrThrow(int type) throws Exception {
+	public boolean readyOrThrow(int type) throws Exception {
 		if (modelTypes == null) {
 			if (getModelIds() == null || type != 10)
 				return true;
@@ -327,7 +309,7 @@ public final class ObjectDefinition {
 		return true;
 	}
 
-	public final boolean ready(int type) {
+	public boolean ready(int type) {
 		if (modelTypes == null) {
 			if (getModelIds() == null || type != 10)
 				return true;
@@ -358,14 +340,14 @@ public final class ObjectDefinition {
 		return true;
 	}
 
-	public final void reset() {
+	public void reset() {
 		modelIds = null;
 		modelTypes = null;
 		name = null;
 		description = null;
 		originalColours = null;
 		replacementColours = null;
-		retextureToFind = null;
+		textureToFind = null;
 		textureToReplace = null;
 		width = 1;
 		length = 1;
@@ -424,7 +406,7 @@ public final class ObjectDefinition {
 		result = prime * result + (occludes ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(originalColours);
 		result = prime * result + Arrays.hashCode(replacementColours);
-		result = prime * result + Arrays.hashCode(retextureToFind);
+		result = prime * result + Arrays.hashCode(textureToFind);
 		result = prime * result + scaleX;
 		result = prime * result + scaleY;
 		result = prime * result + scaleZ;
@@ -440,6 +422,4 @@ public final class ObjectDefinition {
 		result = prime * result + width;
 		return result;
 	}
-
-
 }

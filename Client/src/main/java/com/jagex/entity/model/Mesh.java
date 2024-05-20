@@ -10,7 +10,6 @@ import com.jagex.Client;
 import com.jagex.cache.anim.Frame;
 import com.jagex.cache.anim.FrameBase;
 import com.jagex.cache.loader.anim.FrameLoader;
-import com.jagex.cache.loader.textures.TextureLoader;
 import com.jagex.draw.raster.GameRasterizer;
 import com.jagex.entity.Renderable;
 import com.jagex.util.Constants;
@@ -18,66 +17,29 @@ import com.jagex.util.ObjectKey;
 import com.rspsi.core.misc.ToolType;
 import com.rspsi.options.Options;
 
-import lombok.Getter;
-import lombok.Setter;
-
 @Slf4j
 public class Mesh extends Renderable {
 
-    // Class30_Sub2_Sub4_Sub6
+    public short ambient;
+    public short contrast;
+    public VertexNormal[] vertexNormals;
+    public VertexNormal[] vertexNormalsOffsets;
+    public FaceNormal[] faceNormals;
 
-    public byte[] textureMap;
-    public static boolean aBoolean1684;
+    public int id;
+    protected byte[] textureCoords;
+    public byte[] textureRenderTypes;
     public static int resourceCount;
     public static ObjectKey[] resourceIDTag = new ObjectKey[1000];
-    public static Mesh EMPTY_MODEL = new Mesh();
     public static int mouseX;
     public static int mouseY;
 
-    private static int[] anIntArray1622 = new int[2000];
-    private static int[] anIntArray1623 = new int[2000];
-    private static int[] anIntArray1624 = new int[2000];
-    private static int[] anIntArray1625 = new int[2000];
     static int centroidX;
     static int centroidY;
     static int centroidZ;
     public MeshRevision revision;
     protected int[][] animayaGroups;
     protected int[][] animayaScales;
-
-    public static int checkedLight(int colour, int light, int index) {
-        if ((index & 0x2) != 0) {
-            if (light < 0) {
-                light = 0;
-            } else if (light > 127) {
-                light = 127;
-            }
-
-            return 127 - light;
-        }
-
-        light = light * (colour & 0x7f) >> 7;
-        if (light < 2) {
-            light = 2;
-        } else if (light > 126) {
-            light = 126;
-        }
-
-        return (colour & 0xff80) + light;
-    }
-
-
-    private final static boolean insideTriangle(int x, int y, int k, int l, int i1, int j1, int k1, int l1) {
-        if (y < k && y < l && y < i1)
-            return false;
-        if (y > k && y > l && y > i1)
-            return false;
-        if (x < j1 && x < k1 && x < l1)
-            return false;
-        return x <= j1 || x <= k1 || x <= l1;
-    }
-
-
     public boolean fitsOnSingleSquare;
     public int minimumX;
     public int maximumX;
@@ -88,323 +50,291 @@ public class Mesh extends Renderable {
     public int boundingSphereRadius;
     public int boundingCylinderRadius;
     public int anInt1654;
-    public int[] shadedtriangleColorsX;
-    public int[] shadedtriangleColorsY;
-    public int[] shadedtriangleColorsZ;
+    public int[] colorsX;
+    public int[] colorsY;
+    public int[] colorsZ;
     public int[] faceTransparencies;
-    public int[] triangleColors;
-    public int[] faceMaterial;
+    public int[] faceColors;
+    public short[] faceTextures;
     public int[][] faceGroups;
     public byte[] faceRenderPriorities;
-    public int triangleCount;
-    public int[] packedTransparencyVertexGroups;
-    public int[] faceIndices1;
-    public int[] faceIndices2;
-    public int[] faceIndices3;
-    public VertexNormal[] normals;
+    public int triangleFaceCount;
+    public int[] triangleSkinValues;
+    public int[] trianglePointsX;
+    public int[] trianglePointsY;
+    public int[] trianglePointsZ;
     public byte priority;
-    public int numTextureFaces;
-    public int[] texIndices1;
-    public int[] texIndices2;
-    public int[] texIndices3;
-    public int[] triangleInfo;
+    public int texturesCount;
+    public int[] texTriangleX;
+    public int[] texTriangleY;
+    public int[] texTriangleZ;
+    public int[] faceRenderType;
     public int[][] vertexGroups;
-    public int[] packedVertexGroups;
-    public int[] vertexX;
-    public int[] vertexY;
-    public int[] vertexZ;
-    public int vertexCount;
+    public int[] vertexSkins;
+    public int[] verticesX;
+    public int[] verticesY;
+    public int[] verticesZ;
+    public int verticesCount;
     private boolean translucent;
-
-    //public List<Vector3f> vertexes;
 
     protected Mesh() {
     }
 
-    public Mesh(boolean contouredGround, boolean delayShading, Mesh model) {
-        vertexCount = model.vertexCount;
-        triangleCount = model.triangleCount;
-        numTextureFaces = model.numTextureFaces;
-
+    public Mesh(boolean contouredGround, Mesh model) {
+        verticesCount = model.verticesCount;
+        triangleFaceCount = model.triangleFaceCount;
+        texturesCount = model.texturesCount;
         if (contouredGround) {
-            vertexY = new int[vertexCount];
+            verticesY = new int[verticesCount];
 
-            for (int vertex = 0; vertex < vertexCount; vertex++) {
-                vertexY[vertex] = model.vertexY[vertex];
-            }
+            System.arraycopy(model.verticesY, 0, verticesY, 0, verticesCount);
         } else {
-            vertexY = model.vertexY;
+            verticesY = model.verticesY;
         }
 
-        if (delayShading) {
-            shadedtriangleColorsX = new int[triangleCount];
-            shadedtriangleColorsY = new int[triangleCount];
-            shadedtriangleColorsZ = new int[triangleCount];
-
-            for (int k = 0; k < triangleCount; k++) {
-                shadedtriangleColorsX[k] = model.shadedtriangleColorsX[k];
-                shadedtriangleColorsY[k] = model.shadedtriangleColorsY[k];
-                shadedtriangleColorsZ[k] = model.shadedtriangleColorsZ[k];
-            }
-
-            triangleInfo = new int[triangleCount];
-            if (model.triangleInfo == null) {
-                for (int triangle = 0; triangle < triangleCount; triangle++) {
-                    triangleInfo[triangle] = 0;
-                }
-            } else {
-                for (int index = 0; index < triangleCount; index++) {
-                    triangleInfo[index] = model.triangleInfo[index];
-                }
-            }
-
-            super.normals = new VertexNormal[vertexCount];
-            for (int index = 0; index < vertexCount; index++) {
-                VertexNormal parent = super.normals[index] = new VertexNormal();
-                VertexNormal copied = model.getNormal(index);
-                parent.setX(copied.getX());
-                parent.setY(copied.getY());
-                parent.setZ(copied.getZ());
-                parent.setMagnitude(copied.getMagnitude());
-            }
-
-            normals = model.normals;
-        } else {
-            shadedtriangleColorsX = model.shadedtriangleColorsX;
-            shadedtriangleColorsY = model.shadedtriangleColorsY;
-            shadedtriangleColorsZ = model.shadedtriangleColorsZ;
-            triangleInfo = model.triangleInfo;
-        }
-
-        vertexX = model.vertexX;
-        vertexZ = model.vertexZ;
-        faceMaterial = model.faceMaterial;
-        triangleColors = model.triangleColors;
+        colorsX = model.colorsX;
+        colorsY = model.colorsY;
+        colorsZ = model.colorsZ;
+        faceRenderType = model.faceRenderType;
+        verticesX = model.verticesX;
+        verticesZ = model.verticesZ;
+        faceColors = model.faceColors;
         faceTransparencies = model.faceTransparencies;
+        faceTextures = model.faceTextures;
         faceRenderPriorities = model.faceRenderPriorities;
         priority = model.priority;
-        faceIndices1 = model.faceIndices1;
-        faceIndices2 = model.faceIndices2;
-        faceIndices3 = model.faceIndices3;
-        faceTexture = model.faceTexture;
-        textureMap = model.textureMap;
-        texIndices1 = model.texIndices1;
-        texIndices2 = model.texIndices2;
-        texIndices3 = model.texIndices3;
-        super.modelHeight = model.modelHeight;
-        boundingPlaneRadius = model.boundingPlaneRadius;
-        boundingCylinderRadius = model.boundingCylinderRadius;
-        boundingSphereRadius = model.boundingSphereRadius;
-        minimumX = model.minimumX;
-        maximumZ = model.maximumZ;
-        minimumZ = model.minimumZ;
-        maximumX = model.maximumX;
+        trianglePointsX = model.trianglePointsX;
+        trianglePointsY = model.trianglePointsY;
+        trianglePointsZ = model.trianglePointsZ;
+        textureRenderTypes = model.textureRenderTypes;
+        texTriangleX = model.texTriangleX;
+        texTriangleY = model.texTriangleY;
+        texTriangleZ = model.texTriangleZ;
+        textureCoords = model.textureCoords;
+        contrast = model.contrast;
+        ambient = model.ambient;
+        animayaScales = model.animayaScales;
+        animayaGroups = model.animayaGroups;
     }
 
-    public Mesh(int modelCount, Mesh[] models) {
-        this.vertexCount = 0;
-        this.triangleCount = 0;
+    public Mesh(int length, Mesh[] parts) {
+        this.verticesCount = 0;
+        this.triangleFaceCount = 0;
         this.priority = 0;
-        //this.field1490 = false;
         boolean var3 = false;
         boolean var4 = false;
         boolean var5 = false;
         boolean var6 = false;
         boolean var7 = false;
         boolean var8 = false;
-        this.vertexCount = 0;
-        this.triangleCount = 0;
-        this.numTextureFaces = 0;
+        boolean var11 = false;
+        this.verticesCount = 0;
+        this.triangleFaceCount = 0;
+        this.texturesCount = 0;
         this.priority = -1;
 
         int var9;
         Mesh var10;
-        for (var9 = 0; var9 < modelCount; ++var9) {
-            var10 = models[var9];
+        for (var9 = 0; var9 < length; var9++) {
+            var10 = parts[var9];
             if (var10 != null) {
-                this.vertexCount += var10.vertexCount;
-                this.triangleCount += var10.triangleCount;
-                this.numTextureFaces += var10.numTextureFaces;
+                verticesCount += var10.verticesCount;
+                triangleFaceCount += var10.triangleFaceCount;
+                texturesCount += var10.texturesCount;
                 if (var10.faceRenderPriorities != null) {
                     var4 = true;
                 } else {
-                    if (this.priority == -1) {
-                        this.priority = var10.priority;
+                    if (priority == -1) {
+                        priority = var10.priority;
                     }
 
-                    if (this.priority != var10.priority) {
+                    if (priority != var10.priority) {
                         var4 = true;
                     }
                 }
 
-                var3 |= var10.triangleInfo != null;
+                var3 |= var10.faceRenderType != null;
                 var5 |= var10.faceTransparencies != null;
-                var6 |= var10.packedTransparencyVertexGroups != null;
-                var7 |= var10.faceMaterial != null;
-                var8 |= var10.faceTexture != null;
+                var6 |= var10.triangleSkinValues != null;
+                var7 |= var10.faceTextures != null;
+                var8 |= var10.textureCoords != null;
+                var11 |= var10.animayaGroups != null;
             }
         }
+        verticesX = new int[verticesCount];
+        verticesY = new int[verticesCount];
+        verticesZ = new int[verticesCount];
+        vertexSkins = new int[verticesCount];
+        trianglePointsX = new int[triangleFaceCount];
+        trianglePointsY = new int[triangleFaceCount];
+        trianglePointsZ = new int[triangleFaceCount];
 
-        this.vertexX = new int[this.vertexCount];
-        this.vertexY = new int[this.vertexCount];
-        this.vertexZ = new int[this.vertexCount];
-        this.packedVertexGroups = new int[this.vertexCount];
-        this.faceIndices1 = new int[this.triangleCount];
-        this.faceIndices2 = new int[this.triangleCount];
-        this.faceIndices3 = new int[this.triangleCount];
         if (var3) {
-            this.triangleInfo = new int[this.triangleCount];
+            faceRenderType = new int[triangleFaceCount];
         }
 
         if (var4) {
-            this.faceRenderPriorities = new byte[this.triangleCount];
+            faceRenderPriorities = new byte[triangleFaceCount];
         }
 
         if (var5) {
-            this.faceTransparencies = new int[this.triangleCount];
+            faceTransparencies = new int[triangleFaceCount];
         }
 
         if (var6) {
-            this.packedTransparencyVertexGroups = new int[this.triangleCount];
+            triangleSkinValues = new int[triangleFaceCount];
         }
 
         if (var7) {
-            this.faceMaterial = new int[this.triangleCount];
+            faceTextures = new short[triangleFaceCount];
         }
 
         if (var8) {
-            this.faceTexture = new byte[this.triangleCount];
+            textureCoords = new byte[triangleFaceCount];
         }
 
-        this.triangleColors = new int[this.triangleCount];
-        if (this.numTextureFaces > 0) {
-            this.textureMap = new byte[this.numTextureFaces];
-            this.texIndices1 = new int[this.numTextureFaces];
-            this.texIndices2 = new int[this.numTextureFaces];
-            this.texIndices3 = new int[this.numTextureFaces];
+        if (var11) {
+            this.animayaGroups = new int[this.verticesCount][];
+            this.animayaScales = new int[this.verticesCount][];
         }
 
-        this.vertexCount = 0;
-        this.triangleCount = 0;
-        this.numTextureFaces = 0;
-
-        for (var9 = 0; var9 < modelCount; ++var9) {
-            var10 = models[var9];
+        faceColors = new int[triangleFaceCount];
+        if (texturesCount > 0) {
+            textureRenderTypes = new byte[texturesCount];
+            texTriangleX = new int[texturesCount];
+            texTriangleY = new int[texturesCount];
+            texTriangleZ = new int[texturesCount];
+        }
+        verticesCount = 0;
+        triangleFaceCount = 0;
+        texturesCount = 0;
+        for (var9 = 0; var9 < length; var9++) {
+            var10 = parts[var9];
             if (var10 != null) {
-                int var11;
-                for (var11 = 0; var11 < var10.triangleCount; ++var11) {
-                    if (var3 && var10.triangleInfo != null) {
-                        this.triangleInfo[this.triangleCount] = var10.triangleInfo[var11];
+                for (int face = 0; face < var10.triangleFaceCount; face++) {
+                    if (var3 && var10.faceRenderType != null) {
+                        faceRenderType[triangleFaceCount] = var10.faceRenderType[face];
                     }
 
                     if (var4) {
-                        if (var10.faceRenderPriorities != null) {
-                            this.faceRenderPriorities[this.triangleCount] = var10.faceRenderPriorities[var11];
+                        if (var10.faceRenderPriorities == null) {
+                            faceRenderPriorities[triangleFaceCount] = var10.priority;
                         } else {
-                            this.faceRenderPriorities[this.triangleCount] = var10.priority;
+                            faceRenderPriorities[triangleFaceCount] = var10.faceRenderPriorities[face];
                         }
                     }
 
                     if (var5 && var10.faceTransparencies != null) {
-                        this.faceTransparencies[this.triangleCount] = var10.faceTransparencies[var11];
+                        faceTransparencies[triangleFaceCount] = var10.faceTransparencies[face];
                     }
 
-                    if (var6 && var10.packedTransparencyVertexGroups != null) {
-                        this.packedTransparencyVertexGroups[this.triangleCount] = var10.packedTransparencyVertexGroups[var11];
+                    if (var6 && var10.triangleSkinValues != null) {
+                        triangleSkinValues[triangleFaceCount] = var10.triangleSkinValues[face];
                     }
 
                     if (var7) {
-                        if (var10.faceMaterial != null) {
-                            this.faceMaterial[this.triangleCount] = var10.faceMaterial[var11];
+                        if (var10.faceTextures != null) {
+                            faceTextures[triangleFaceCount] = var10.faceTextures[face];
                         } else {
-                            this.faceMaterial[this.triangleCount] = -1;
+                            faceTextures[triangleFaceCount] = -1;
                         }
                     }
-
                     if (var8) {
-                        if (var10.faceTexture != null && var10.faceTexture[var11] != -1) {
-                            this.faceTexture[this.triangleCount] = (byte) (this.numTextureFaces + var10.faceTexture[var11]);
+                        if (var10.textureCoords != null && var10.textureCoords[face] != -1) {
+                            textureCoords[triangleFaceCount] = (byte) (texturesCount + var10.textureCoords[face]);
                         } else {
-                            this.faceTexture[this.triangleCount] = -1;
+                            textureCoords[triangleFaceCount] = -1;
                         }
                     }
-
-                    this.triangleColors[this.triangleCount] = var10.triangleColors[var11];
-                    this.faceIndices1[this.triangleCount] = this.findMatchingVertex(var10, var10.faceIndices1[var11]);
-                    this.faceIndices2[this.triangleCount] = this.findMatchingVertex(var10, var10.faceIndices2[var11]);
-                    this.faceIndices3[this.triangleCount] = this.findMatchingVertex(var10, var10.faceIndices3[var11]);
-                    ++this.triangleCount;
+                    faceColors[triangleFaceCount] = var10.faceColors[face];
+                    trianglePointsX[triangleFaceCount] = findMatchingVertex(var10, var10.trianglePointsX[face]);
+                    trianglePointsY[triangleFaceCount] = findMatchingVertex(var10, var10.trianglePointsY[face]);
+                    trianglePointsZ[triangleFaceCount] = findMatchingVertex(var10, var10.trianglePointsZ[face]);
+                    triangleFaceCount++;
                 }
-
-                for (var11 = 0; var11 < var10.numTextureFaces; ++var11) {
-                    byte var12 = this.textureMap[this.numTextureFaces] = var10.textureMap[var11];
+                for (int texture_edge = 0; texture_edge < var10.texturesCount; texture_edge++) {
+                    final byte var12 = textureRenderTypes[texturesCount] = var10.textureRenderTypes[texture_edge];
                     if (var12 == 0) {
-                        this.texIndices1[this.numTextureFaces] = (short) this.findMatchingVertex(var10, var10.texIndices1[var11]);
-                        this.texIndices2[this.numTextureFaces] = (short) this.findMatchingVertex(var10, var10.texIndices2[var11]);
-                        this.texIndices3[this.numTextureFaces] = (short) this.findMatchingVertex(var10, var10.texIndices3[var11]);
+                        texTriangleX[texturesCount] = findMatchingVertex(var10, var10.texTriangleX[texture_edge]);
+                        texTriangleY[texturesCount] = findMatchingVertex(var10, var10.texTriangleY[texture_edge]);
+                        texTriangleZ[texturesCount] = findMatchingVertex(var10, var10.texTriangleZ[texture_edge]);
                     }
-
-                    ++this.numTextureFaces;
+                    texturesCount++;
                 }
             }
         }
-
     }
 
     public Mesh(Mesh model, boolean shareColours, boolean shareAlphas, boolean shareVertices, boolean shareTextures) {
-        vertexCount = model.vertexCount;
-        triangleCount = model.triangleCount;
-        numTextureFaces = model.numTextureFaces;
+        verticesCount = model.verticesCount;
+        triangleFaceCount = model.triangleFaceCount;
+        texturesCount = model.texturesCount;
 
         if (shareVertices) {
-            vertexX = model.vertexX;
-            vertexY = model.vertexY;
-            vertexZ = model.vertexZ;
+            verticesX = model.verticesX;
+            verticesY = model.verticesY;
+            verticesZ = model.verticesZ;
         } else {
-            vertexX = copyArray(model.vertexX);
-            vertexY = copyArray(model.vertexY);
-            vertexZ = copyArray(model.vertexZ);
+            verticesX = new int[verticesCount];
+            verticesY = new int[verticesCount];
+            verticesZ = new int[verticesCount];
+
+            for (int i = 0; i < verticesCount; i++) {
+                verticesX[i] = model.verticesX[i];
+                verticesY[i] = model.verticesY[i];
+                verticesZ[i] = model.verticesZ[i];
+            }
         }
 
-        if (!shareColours && model.triangleColors != null) {
-            triangleColors = copyArray(model.triangleColors);
+        if (shareColours) {
+            faceColors = model.faceColors;
         } else {
-            triangleColors = model.triangleColors;
-        }
-
-        if (!shareTextures && model.faceMaterial != null) {
-            this.faceMaterial = copyArray(model.faceMaterial);
-        } else {
-            this.faceMaterial = model.faceMaterial;
+            faceColors = new int[triangleFaceCount];
+            System.arraycopy(model.faceColors, 0, faceColors, 0, triangleFaceCount);
         }
 
         if (shareAlphas) {
             faceTransparencies = model.faceTransparencies;
         } else {
+            faceTransparencies = new int[triangleFaceCount];
             if (model.faceTransparencies == null) {
-                faceTransparencies = new int[triangleCount];
-                Arrays.fill(faceTransparencies, 0);
-                for (int face = 0; face < triangleCount; face++) {
-                    faceTransparencies[face] = 0;
+                for (int i = 0; i < triangleFaceCount; i++) {
+                    faceTransparencies[i] = 0;
                 }
             } else {
-                faceTransparencies = copyArray(model.faceTransparencies);
+                System.arraycopy(model.faceTransparencies, 0, faceTransparencies, 0, triangleFaceCount);
             }
         }
 
-        packedVertexGroups = model.packedVertexGroups;
-        packedTransparencyVertexGroups = model.packedTransparencyVertexGroups;
-        textureMap = model.textureMap;
-        faceTexture = model.faceTexture;
-        triangleInfo = model.triangleInfo;
-        faceIndices1 = model.faceIndices1;
-        faceIndices2 = model.faceIndices2;
-        faceIndices3 = model.faceIndices3;
+        if (shareTextures) {
+            faceTextures = model.faceTextures;
+        } else {
+            if (model.faceTextures != null) {
+                faceTextures = new short[triangleFaceCount];
+                System.arraycopy(model.faceTextures, 0, faceTextures, 0, triangleFaceCount);
+            }
+        }
+
+        vertexSkins = model.vertexSkins;
+        triangleSkinValues = model.triangleSkinValues;
+        faceRenderType = model.faceRenderType;
+        trianglePointsX = model.trianglePointsX;
+        trianglePointsY = model.trianglePointsY;
+        trianglePointsZ = model.trianglePointsZ;
         faceRenderPriorities = model.faceRenderPriorities;
+        textureCoords = model.textureCoords;
         priority = model.priority;
-        texIndices1 = model.texIndices1;
-        texIndices2 = model.texIndices2;
-        texIndices3 = model.texIndices3;
+        textureRenderTypes = model.textureRenderTypes;
+        texTriangleX = model.texTriangleX;
+        texTriangleY = model.texTriangleY;
+        texTriangleZ = model.texTriangleZ;
+        vertexNormals = model.vertexNormals;
+        faceNormals = model.faceNormals;
+        vertexNormalsOffsets = model.vertexNormalsOffsets;
+        animayaScales = model.animayaScales;
+        animayaGroups = model.animayaGroups;
+        ambient = model.ambient;
+        contrast = model.contrast;
     }
 
     public void apply(int frame) {
@@ -429,139 +359,6 @@ public class Mesh extends Renderable {
         }
     }
 
-    public void apply(int primaryId, int secondaryId, int[] interleaveOrder) {
-        if (primaryId == -1)
-            return;
-        else if (interleaveOrder == null || secondaryId == -1) {
-            apply(primaryId);
-            return;
-        }
-
-        Frame primary = FrameLoader.lookup(primaryId);
-        if (primary == null)
-            return;
-
-        Frame secondary = FrameLoader.lookup(secondaryId);
-        if (secondary == null) {
-            apply(primaryId);
-            return;
-        }
-
-        FrameBase base = primary.getBase();
-        centroidX = 0;
-        centroidY = 0;
-        centroidZ = 0;
-        int index = 0;
-
-        int next = interleaveOrder[index++];
-        for (int transformation = 0; transformation < primary.getTransformationCount(); transformation++) {
-            int group;
-            for (group = primary
-                    .getTransformationIndex(transformation); group > next; next = interleaveOrder[index++]) {
-
-            }
-            if (group != next || base.getTransformationType(group) == 0) {
-                transform(base.getTransformationType(group), base.getLabels(group),
-                        primary.getTransformX(transformation), primary.getTransformY(transformation),
-                        primary.getTransformZ(transformation));
-            }
-        }
-
-        centroidX = 0;
-        centroidY = 0;
-        centroidZ = 0;
-        index = 0;
-        next = interleaveOrder[index++];
-
-        for (int transformation = 0; transformation < secondary.getTransformationCount(); transformation++) {
-            int group;
-            for (group = secondary
-                    .getTransformationIndex(transformation); group > next; next = interleaveOrder[index++]) {
-
-            }
-
-            if (group == next || base.getTransformationType(group) == 0) {
-                transform(base.getTransformationType(group), base.getLabels(group),
-                        secondary.getTransformX(transformation), secondary.getTransformY(transformation),
-                        secondary.getTransformZ(transformation));
-            }
-        }
-    }
-
-    private int extremeX = -1, extremeY = -1, extremeZ = -1;
-    private int centerX = -1, centerY = -1, centerZ = -1;
-
-    public void calculateExtreme(int orientation) {
-        if (this.extremeX == -1) {
-            int var2 = 0;
-            int var3 = 0;
-            int var4 = 0;
-            int var5 = 0;
-            int var6 = 0;
-            int var7 = 0;
-            int var8 = Constants.COSINE[orientation];
-            int var9 = Constants.SINE[orientation];
-
-            for (int var10 = 0; var10 < this.vertexCount; ++var10) {
-                int var11 = method3027(this.vertexX[var10], this.vertexZ[var10], var8, var9);
-                int var12 = this.vertexY[var10];
-                int var13 = method3028(this.vertexX[var10], this.vertexZ[var10], var8, var9);
-                if (var11 < var2) {
-                    var2 = var11;
-                }
-
-                if (var11 > var5) {
-                    var5 = var11;
-                }
-
-                if (var12 < var3) {
-                    var3 = var12;
-                }
-
-                if (var12 > var6) {
-                    var6 = var12;
-                }
-
-                if (var13 < var4) {
-                    var4 = var13;
-                }
-
-                if (var13 > var7) {
-                    var7 = var13;
-                }
-            }
-
-            this.centerX = (var5 + var2) / 2;
-            this.centerY = (var6 + var3) / 2;
-            this.centerZ = (var7 + var4) / 2;
-            this.extremeX = (var5 - var2 + 1) / 2;
-            this.extremeY = (var6 - var3 + 1) / 2;
-            this.extremeZ = (var7 - var4 + 1) / 2;
-            if (this.extremeX < 32) {
-                this.extremeX = 32;
-            }
-
-            if (this.extremeZ < 32) {
-                this.extremeZ = 32;
-            }
-
-            //TODO: Figure out what this does
-			/*if(this.field1672) {
-				this.extremeX += 8;
-				this.extremeZ += 8;
-			}*/
-
-        }
-    }
-
-    private static final int method3027(int var0, int var1, int var2, int var3) {
-        return var0 * var2 + var3 * var1 >> 16;
-    }
-
-    private static final int method3028(int var0, int var1, int var2, int var3) {
-        return var2 * var1 - var3 * var0 >> 16;
-    }
-
     public void computeBounds() {
         super.modelHeight = 0;
         boundingPlaneRadius = 0;
@@ -571,10 +368,10 @@ public class Mesh extends Renderable {
         maximumZ = 0xfffe7961;
         minimumZ = 0x1869f;
 
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            int x = vertexX[vertex];
-            int y = vertexY[vertex];
-            int z = vertexZ[vertex];
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            int x = verticesX[vertex];
+            int y = verticesY[vertex];
+            int z = verticesZ[vertex];
 
             if (x < minimumX) {
                 minimumX = x;
@@ -607,10 +404,8 @@ public class Mesh extends Renderable {
         }
 
         boundingPlaneRadius = (int) Math.sqrt(boundingPlaneRadius);
-        boundingCylinderRadius = (int) Math
-                .sqrt(boundingPlaneRadius * boundingPlaneRadius + super.modelHeight * super.modelHeight);
-        boundingSphereRadius = boundingCylinderRadius
-                + (int) Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + minimumY * minimumY);
+        boundingCylinderRadius = (int) Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + super.modelHeight * super.modelHeight);
+        boundingSphereRadius = boundingCylinderRadius + (int) Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + minimumY * minimumY);
     }
 
     public void computeCircularBounds() {
@@ -618,10 +413,10 @@ public class Mesh extends Renderable {
         boundingPlaneRadius = 0;
         minimumY = 0;
 
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            int x = vertexX[vertex];
-            int y = vertexY[vertex];
-            int z = vertexZ[vertex];
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            int x = verticesX[vertex];
+            int y = verticesY[vertex];
+            int z = verticesZ[vertex];
 
             if (-y > super.modelHeight) {
                 super.modelHeight = -y;
@@ -638,18 +433,16 @@ public class Mesh extends Renderable {
         }
 
         boundingPlaneRadius = (int) (Math.sqrt(boundingPlaneRadius) + 0.99D);
-        boundingCylinderRadius = (int) (Math
-                .sqrt(boundingPlaneRadius * boundingPlaneRadius + super.modelHeight * super.modelHeight) + 0.99D);
-        boundingSphereRadius = boundingCylinderRadius
-                + (int) (Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + minimumY * minimumY) + 0.99D);
+        boundingCylinderRadius = (int) (Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + super.modelHeight * super.modelHeight) + 0.99D);
+        boundingSphereRadius = boundingCylinderRadius + (int) (Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + minimumY * minimumY) + 0.99D);
     }
 
     public void computeSphericalBounds() {
         super.modelHeight = 0;
         minimumY = 0;
 
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            int y = vertexY[vertex];
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            int y = verticesY[vertex];
             if (-y > super.modelHeight) {
                 super.modelHeight = -y;
             }
@@ -659,240 +452,299 @@ public class Mesh extends Renderable {
             }
         }
 
-        boundingCylinderRadius = (int) (Math
-                .sqrt(boundingPlaneRadius * boundingPlaneRadius + super.modelHeight * super.modelHeight)
-                + 0.98999999999999999D);
-        boundingSphereRadius = boundingCylinderRadius
-                + (int) (Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + minimumY * minimumY)
-                + 0.98999999999999999D);
+        boundingCylinderRadius = (int) (Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + super.modelHeight * super.modelHeight) + 0.98999999999999999D);
+        boundingSphereRadius = boundingCylinderRadius + (int) (Math.sqrt(boundingPlaneRadius * boundingPlaneRadius + minimumY * minimumY) + 0.98999999999999999D);
     }
 
-    private final int findMatchingVertex(Mesh model, int vertex) {
+    private int findMatchingVertex(Mesh model, int vertex) {
         int matched = -1;
-        int x = model.vertexX[vertex];
-        int y = model.vertexY[vertex];
-        int z = model.vertexZ[vertex];
+        int x = model.verticesX[vertex];
+        int y = model.verticesY[vertex];
+        int z = model.verticesZ[vertex];
 
-        for (int index = 0; index < vertexCount; index++) {
-            if (x == vertexX[index] && y == vertexY[index] && z == vertexZ[index]) {
+        for (int index = 0; index < verticesCount; index++) {
+            if (x == verticesX[index] && y == verticesY[index] && z == verticesZ[index]) {
                 matched = index;
                 break;
             }
         }
 
         if (matched == -1) {
-            vertexX[vertexCount] = x;
-            vertexY[vertexCount] = y;
-            vertexZ[vertexCount] = z;
+            verticesX[verticesCount] = x;
+            verticesY[verticesCount] = y;
+            verticesZ[verticesCount] = z;
 
-            if (model.packedVertexGroups != null) {
-                packedVertexGroups[vertexCount] = model.packedVertexGroups[vertex];
+            if (model.vertexSkins != null) {
+                vertexSkins[verticesCount] = model.vertexSkins[vertex];
             }
 
-            matched = vertexCount++;
+            matched = verticesCount++;
         }
 
         return matched;
     }
 
     public void invert() {
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            vertexZ[vertex] = -vertexZ[vertex];
+        for (int i = 0; i < verticesCount; i++) {
+            verticesZ[i] = -verticesZ[i];
         }
 
-        for (int vertex = 0; vertex < triangleCount; vertex++) {
-            int x = faceIndices1[vertex];
-            faceIndices1[vertex] = faceIndices3[vertex];
-            faceIndices3[vertex] = x;
-        }
-    }
-
-    public final void light(int lighting, int diffusion, int x, int y, int z, boolean immediateShading) {
-        int length = (int) Math.sqrt(x * x + y * y + z * z);
-        int k1 = diffusion * length >> 8;
-
-        if (shadedtriangleColorsX == null) {
-            shadedtriangleColorsX = new int[triangleCount];
-            shadedtriangleColorsY = new int[triangleCount];
-            shadedtriangleColorsZ = new int[triangleCount];
-        }
-
-        if (super.normals == null) {
-            super.normals = new VertexNormal[vertexCount];
-            for (int index = 0; index < vertexCount; index++) {
-                super.normals[index] = new VertexNormal();
-            }
-        }
-
-        for (int face = 0; face < triangleCount; face++) {
-            int faceX = faceIndices1[face];
-            int faceY = faceIndices2[face];
-            int faceZ = faceIndices3[face];
-            int j3 = vertexX[faceY] - vertexX[faceX];
-            int k3 = vertexY[faceY] - vertexY[faceX];
-            int l3 = vertexZ[faceY] - vertexZ[faceX];
-            int i4 = vertexX[faceZ] - vertexX[faceX];
-            int j4 = vertexY[faceZ] - vertexY[faceX];
-            int k4 = vertexZ[faceZ] - vertexZ[faceX];
-            int dx = k3 * k4 - j4 * l3;
-            int dy = l3 * i4 - k4 * j3;
-            int dz;
-
-            for (dz = j3 * j4 - i4 * k3; dx > 8192 || dy > 8192 || dz > 8192 || dx < -8192 || dy < -8192
-                    || dz < -8192; dz >>= 1) {
-                dx >>= 1;
-                dy >>= 1;
-            }
-
-            int deltaLength = (int) Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (deltaLength <= 0) {
-                deltaLength = 1;
-            }
-
-            dx = dx * 256 / deltaLength;
-            dy = dy * 256 / deltaLength;
-            dz = dz * 256 / deltaLength;
-
-            if (triangleInfo == null || (triangleInfo[face] & 1) == 0) {
-                VertexNormal normal = super.normals[faceX];
-                normal.setX(normal.getX() + dx);
-                normal.setY(normal.getY() + dy);
-                normal.setZ(normal.getZ() + dz);
-                normal.setMagnitude(normal.getMagnitude() + 1);
-                normal = super.normals[faceY];
-                normal.setX(normal.getX() + dx);
-                normal.setY(normal.getY() + dy);
-                normal.setZ(normal.getZ() + dz);
-                normal.setMagnitude(normal.getMagnitude() + 1);
-                normal = super.normals[faceZ];
-                normal.setX(normal.getX() + dx);
-                normal.setY(normal.getY() + dy);
-                normal.setZ(normal.getZ() + dz);
-                normal.setMagnitude(normal.getMagnitude() + 1);
-            } else {
-                int l5 = lighting + (x * dx + y * dy + z * dz) / (k1 + k1 / 2);
-                shadedtriangleColorsX[face] = checkedLight(triangleColors[face], l5, triangleInfo[face]);
-            }
-        }
-
-        if (immediateShading) {
-            shade(lighting, k1, x, y, z);
-        } else {
-            normals = new VertexNormal[vertexCount];
-            for (int index = 0; index < vertexCount; index++) {
-                VertexNormal parent = super.normals[index];
-                VertexNormal copied = normals[index] = new VertexNormal();
-                copied.setX(parent.getX());
-                copied.setY(parent.getY());
-                copied.setZ(parent.getZ());
-                copied.setMagnitude(parent.getMagnitude());
-            }
-        }
-
-        if (immediateShading) {
-            computeCircularBounds();
-        } else {
-            computeBounds();
+        for (int i = 0; i < triangleFaceCount; i++) {
+            int x = trianglePointsX[i];
+            trianglePointsX[i] = trianglePointsZ[i];
+            trianglePointsZ[i] = x;
         }
     }
 
-    public void method464(Mesh model, boolean shareAlphas) {
-        vertexCount = model.vertexCount;
-        triangleCount = model.triangleCount;
-        numTextureFaces = model.numTextureFaces;
+    public void calculateVertexNormals() {
+        if (vertexNormals == null) {
+            vertexNormals = new VertexNormal[verticesCount];
 
-        if (anIntArray1622.length < vertexCount) {
-            anIntArray1622 = new int[vertexCount + 100];
-            anIntArray1623 = new int[vertexCount + 100];
-            anIntArray1624 = new int[vertexCount + 100];
-        }
-
-        vertexX = anIntArray1622;
-        vertexY = anIntArray1623;
-        vertexZ = anIntArray1624;
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            vertexX[vertex] = model.vertexX[vertex];
-            vertexY[vertex] = model.vertexY[vertex];
-            vertexZ[vertex] = model.vertexZ[vertex];
-        }
-
-        if (shareAlphas) {
-            faceTransparencies = model.faceTransparencies;
-        } else {
-            if (anIntArray1625.length < triangleCount) {
-                anIntArray1625 = new int[triangleCount + 100];
+            int var1;
+            for (var1 = 0; var1 < verticesCount; ++var1) {
+                vertexNormals[var1] = new VertexNormal();
             }
-            faceTransparencies = anIntArray1625;
 
-            if (model.faceTransparencies == null) {
-                for (int index = 0; index < triangleCount; index++) {
-                    faceTransparencies[index] = 0;
+            for (var1 = 0; var1 < triangleFaceCount; ++var1) {
+                final int var2 = trianglePointsX[var1];
+                final int var3 = trianglePointsY[var1];
+                final int var4 = trianglePointsZ[var1];
+                final int var5 = verticesX[var3] - verticesX[var2];
+                final int var6 = verticesY[var3] - verticesY[var2];
+                final int var7 = verticesZ[var3] - verticesZ[var2];
+                final int var8 = verticesX[var4] - verticesX[var2];
+                final int var9 = verticesY[var4] - verticesY[var2];
+                final int var10 = verticesZ[var4] - verticesZ[var2];
+                int var11 = var6 * var10 - var9 * var7;
+                int var12 = var7 * var8 - var10 * var5;
+
+                int var13;
+                for (var13 = var5 * var9 - var8 * var6;
+                     var11 > 8192 || var12 > 8192 || var13 > 8192 || var11 < -8192 || var12 < -8192 || var13 < -8192; var13 >>= 1) {
+                    var11 >>= 1;
+                    var12 >>= 1;
                 }
-            } else {
-                for (int index = 0; index < triangleCount; index++) {
-                    faceTransparencies[index] = model.faceTransparencies[index];
+
+                int var14 = (int) Math.sqrt(var11 * var11 + var12 * var12 + var13 * var13);
+                if (var14 <= 0) {
+                    var14 = 1;
+                }
+
+                var11 = var11 * 256 / var14;
+                var12 = var12 * 256 / var14;
+                var13 = var13 * 256 / var14;
+                final int var15;
+                if (faceRenderType == null) {
+                    var15 = 0;
+                } else {
+                    var15 = faceRenderType[var1];
+                }
+
+                if (var15 == 0) {
+                    VertexNormal var16 = vertexNormals[var2];
+                    var16.x += var11;
+                    var16.y += var12;
+                    var16.z += var13;
+                    ++var16.magnitude;
+                    var16 = vertexNormals[var3];
+                    var16.x += var11;
+                    var16.y += var12;
+                    var16.z += var13;
+                    ++var16.magnitude;
+                    var16 = vertexNormals[var4];
+                    var16.x += var11;
+                    var16.y += var12;
+                    var16.z += var13;
+                    ++var16.magnitude;
+                } else if (var15 == 1) {
+                    if (faceNormals == null) {
+                        faceNormals = new FaceNormal[triangleFaceCount];
+                    }
+
+                    final FaceNormal var17 = faceNormals[var1] = new FaceNormal();
+                    var17.x = var11;
+                    var17.y = var12;
+                    var17.z = var13;
                 }
             }
         }
-
-        triangleInfo = model.triangleInfo;
-        textureMap = model.textureMap;
-        faceTexture = model.faceTexture;
-        triangleColors = model.triangleColors;
-        faceMaterial = model.faceMaterial;
-        faceRenderPriorities = model.faceRenderPriorities;
-        priority = model.priority;
-        faceGroups = model.faceGroups;
-        vertexGroups = model.vertexGroups;
-        faceIndices1 = model.faceIndices1;
-        faceIndices2 = model.faceIndices2;
-        faceIndices3 = model.faceIndices3;
-        shadedtriangleColorsX = model.shadedtriangleColorsX;
-        shadedtriangleColorsY = model.shadedtriangleColorsY;
-        shadedtriangleColorsZ = model.shadedtriangleColorsZ;
-        texIndices1 = model.texIndices1;
-        texIndices2 = model.texIndices2;
-        texIndices3 = model.texIndices3;
     }
 
-    private static ObjectKey activeKey;
+    public void light(final int ambient, final int contrast, final int x, final int y, final int z) {
+        this.contrast = (short) contrast;
+        this.ambient = (short) ambient;
+
+        calculateVertexNormals();
+        final int magnitude = (int) Math.sqrt(x * x + y * y + z * z);
+        final int var7 = contrast * magnitude >> 8;
+        colorsX = new int[triangleFaceCount];
+        colorsY = new int[triangleFaceCount];
+        colorsZ = new int[triangleFaceCount];
+
+        for (int var16 = 0; var16 < this.triangleFaceCount; ++var16) {
+            int var17;
+            if (this.faceRenderType == null) {
+                var17 = 0;
+            } else {
+                var17 = this.faceRenderType[var16];
+            }
+
+            int var18;
+            if (this.faceTransparencies == null) {
+                var18 = 0;
+            } else {
+                var18 = this.faceTransparencies[var16];
+            }
+
+            short var12;
+            if (this.faceTextures == null) {
+                var12 = -1;
+            } else {
+                var12 = this.faceTextures[var16];
+            }
+
+            if (var18 == -2) {
+                var17 = 3;
+            }
+
+            if (var18 == -1) {
+                var17 = 2;
+            }
+
+            VertexNormal var13;
+            int var14;
+            FaceNormal var19;
+            if (var12 == -1) {
+                if (var17 != 0) {
+                    if (var17 == 1) {
+                        var19 = this.faceNormals[var16];
+                        var14 = (y * var19.y + z * var19.z + x * var19.x) / (var7 / 2 + var7) + ambient;
+                        colorsX[var16] = method2792(this.faceColors[var16] & '\uffff', var14);
+                        colorsZ[var16] = -1;
+                    } else if (var17 == 3) {
+                        colorsX[var16] = 128;
+                        colorsZ[var16] = -1;
+                    } else {
+                        colorsZ[var16] = -2;
+                    }
+                } else {
+                    int var15 = this.faceColors[var16] & '\uffff';
+                    if (this.vertexNormalsOffsets != null && this.vertexNormalsOffsets[this.trianglePointsX[var16]] != null) {
+                        var13 = this.vertexNormalsOffsets[this.trianglePointsX[var16]];
+                    } else {
+                        var13 = this.vertexNormals[this.trianglePointsX[var16]];
+                    }
+
+                    var14 = (y * var13.y + z * var13.z + x * var13.x) / (var7 * var13.magnitude) + ambient;
+                    colorsX[var16] = method2792(var15, var14);
+                    if (this.vertexNormalsOffsets != null && this.vertexNormalsOffsets[this.trianglePointsY[var16]] != null) {
+                        var13 = this.vertexNormalsOffsets[this.trianglePointsY[var16]];
+                    } else {
+                        var13 = this.vertexNormals[this.trianglePointsY[var16]];
+                    }
+
+                    var14 = (y * var13.y + z * var13.z + x * var13.x) / (var7 * var13.magnitude) + ambient;
+                    colorsY[var16] = method2792(var15, var14);
+                    if (this.vertexNormalsOffsets != null && this.vertexNormalsOffsets[this.trianglePointsZ[var16]] != null) {
+                        var13 = this.vertexNormalsOffsets[this.trianglePointsZ[var16]];
+                    } else {
+                        var13 = this.vertexNormals[this.trianglePointsZ[var16]];
+                    }
+
+                    var14 = (y * var13.y + z * var13.z + x * var13.x) / (var7 * var13.magnitude) + ambient;
+                    colorsZ[var16] = method2792(var15, var14);
+                }
+            } else if (var17 != 0) {
+                if (var17 == 1) {
+                    var19 = this.faceNormals[var16];
+                    var14 = (y * var19.y + z * var19.z + x * var19.x) / (var7 / 2 + var7) + ambient;
+                    colorsX[var16] = method2820(var14);
+                    colorsZ[var16] = -1;
+                } else {
+                    colorsZ[var16] = -2;
+                }
+            } else {
+                if (this.vertexNormalsOffsets != null && this.vertexNormalsOffsets[this.trianglePointsX[var16]] != null) {
+                    var13 = this.vertexNormalsOffsets[this.trianglePointsX[var16]];
+                } else {
+                    var13 = this.vertexNormals[this.trianglePointsX[var16]];
+                }
+
+                var14 = (y * var13.y + z * var13.z + x * var13.x) / (var7 * var13.magnitude) + ambient;
+                colorsX[var16] = method2820(var14);
+                if (this.vertexNormalsOffsets != null && this.vertexNormalsOffsets[this.trianglePointsY[var16]] != null) {
+                    var13 = this.vertexNormalsOffsets[this.trianglePointsY[var16]];
+                } else {
+                    var13 = this.vertexNormals[this.trianglePointsY[var16]];
+                }
+
+                var14 = (y * var13.y + z * var13.z + x * var13.x) / (var7 * var13.magnitude) + ambient;
+                colorsY[var16] = method2820(var14);
+                if (this.vertexNormalsOffsets != null && this.vertexNormalsOffsets[this.trianglePointsZ[var16]] != null) {
+                    var13 = this.vertexNormalsOffsets[this.trianglePointsZ[var16]];
+                } else {
+                    var13 = this.vertexNormals[this.trianglePointsZ[var16]];
+                }
+
+                var14 = (y * var13.y + z * var13.z + x * var13.x) / (var7 * var13.magnitude) + ambient;
+                colorsZ[var16] = method2820(var14);
+            }
+        }
+
+        computeCircularBounds();
+    }
+
+    private int method2820(int var0) {
+        if (var0 < 2) {
+            var0 = 2;
+        } else if (var0 > 126) {
+            var0 = 126;
+        }
+        return var0;
+    }
+
+    private int method2792(final int var0, int var1) {
+        var1 = (var0 & 127) * var1 >> 7;
+        if (var1 < 2) {
+            var1 = 2;
+        } else if (var1 > 126) {
+            var1 = 126;
+        }
+        return (var0 & '\uff80') + var1;
+    }
+
 
     private void renderFaces(GameRasterizer rasterizer, boolean flag, boolean multiTileFlag, ObjectKey key, int z) {
         for (int j = 0; j < boundingSphereRadius; j++) {
             rasterizer.depthListIndices[j] = 0;
         }
 
-        activeKey = key;
-
-        for (int face = 0; face < triangleCount; face++) {
-            if (triangleInfo == null || triangleInfo[face] != -1) {
-                int indexX = faceIndices1[face];
-                int indexY = faceIndices2[face];
-                int indexZ = faceIndices3[face];
+        for (int face = 0; face < triangleFaceCount; face++) {
+            if (colorsZ[face] != -2) {
+                int indexX = trianglePointsX[face];
+                int indexY = trianglePointsY[face];
+                int indexZ = trianglePointsZ[face];
                 int i3 = rasterizer.vertexScreenX[indexX];
                 int l3 = rasterizer.vertexScreenX[indexY];
                 int k4 = rasterizer.vertexScreenX[indexZ];
 
                 if (flag && (i3 == -5000 || l3 == -5000 || k4 == -5000)) {
                     rasterizer.cullFacesOther[face] = true;
-                    int j5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3
-                            + boundingCylinderRadius;
+                    int j5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3 + boundingCylinderRadius;
                     rasterizer.faceList[j5][rasterizer.depthListIndices[j5]++] = face;
                 } else {
                     if (key != null && multiTileFlag) {
-                        if (insideTriangle(mouseX, mouseY, rasterizer.vertexScreenY[indexX], rasterizer.vertexScreenY[indexY],
-                                rasterizer.vertexScreenY[indexZ], i3, l3, k4)) {
-
+                        if (insideTriangle(mouseX, mouseY, rasterizer.vertexScreenY[indexX], rasterizer.vertexScreenY[indexY], rasterizer.vertexScreenY[indexZ], i3, l3, k4)) {
 
                             boolean correctTool = (Options.currentTool.get() == ToolType.SELECT_OBJECT || Options.currentTool.get() == ToolType.DELETE_OBJECT);
                             if (Options.currentHeight.get() == z && correctTool) {
                                 int type = key.getType();
-
                                 int selectionType = Options.objectSelectionType.get() - 1;
                                 if (selectionType == -1 || type == selectionType) {
-                                    resourceIDTag[resourceCount++] = key;// ObjectKey.closestToCamera(Client.hoveredUID, key, Client.getSingleton().xCameraPos, Client.getSingleton().yCameraPos, Client.getSingleton().zCameraPos);
-                                    if (Client.hoveredUID == null)
+                                    resourceIDTag[resourceCount++] = key;
+                                    if (Client.hoveredUID == null) {
                                         Client.hoveredUID = key;
+                                    }
                                 }
                             }
 
@@ -903,10 +755,8 @@ public class Mesh extends Renderable {
                     }
 
                     translucent = false;
-                    //translucent = false;
                     if (key != null) {
-                        if (Options.currentTool.get() == ToolType.SELECT_OBJECT
-                                || Options.currentTool.get() == ToolType.DELETE_OBJECT)
+                        if (Options.currentTool.get() == ToolType.SELECT_OBJECT || Options.currentTool.get() == ToolType.DELETE_OBJECT)
                             translucent = Objects.equals(Client.hoveredUID, key) && z == Options.currentHeight.get();
                         else
                             translucent = false;
@@ -935,7 +785,6 @@ public class Mesh extends Renderable {
                     }
                 }
             }
-
             return;
         }
         for (int j1 = 0; j1 < 12; j1++) {
@@ -1040,7 +889,6 @@ public class Mesh extends Renderable {
             for (int j7 = 0; j7 < i7; j7++) {
                 renderFace(rasterizer, ai4[j7]);
             }
-
         }
 
         while (i5 != -1000) {
@@ -1059,175 +907,163 @@ public class Mesh extends Renderable {
         }
     }
 
-    private void renderFace(GameRasterizer rasterizer, int index) {
-        if (rasterizer.cullFacesOther[index]) {
-            method485(rasterizer, index);
+    private void renderFace(GameRasterizer rasterizer, int idx) {
+        if (rasterizer.cullFacesOther[idx]) {
+            method485(rasterizer, idx);
             return;
         }
-        int faceX = faceIndices1[index];
-        int faceY = faceIndices2[index];
-        int faceZ = faceIndices3[index];
-        rasterizer.restrictEdges = rasterizer.cullFaces[index];
+
+        int triangleX = trianglePointsX[idx];
+        int triangleY = trianglePointsY[idx];
+        int triangleZ = trianglePointsZ[idx];
+        rasterizer.restrictEdges = rasterizer.cullFaces[idx];
         if (selected) {
             rasterizer.currentAlpha = translucent ? 100 : 50;
         }
+
         if (translucent) {
             rasterizer.currentAlpha = 140;
         } else if (!selected) {
             if (faceTransparencies == null) {
                 rasterizer.currentAlpha = 0;
             } else {
-                rasterizer.currentAlpha = faceTransparencies[index];
+                rasterizer.currentAlpha = faceTransparencies[idx];
             }
         }
+
         int type;
-        if (triangleInfo == null) {
-            type = faceMaterial != null && faceMaterial[index] != -1 ? 2 : 0;
+        if (faceRenderType == null) {
+            type = 0;
         } else {
-            type = triangleInfo[index] & 3;
+            type = faceRenderType[idx] & 3;
 
         }
-        boolean ignoreTextures = translucent || selected;
 
-        if (type == 0 && !ignoreTextures) {
-            rasterizer.drawGouraudTriangle(rasterizer.vertexScreenY[faceX], rasterizer.vertexScreenY[faceY], rasterizer.vertexScreenY[faceZ], rasterizer.vertexScreenX[faceX],
-                    rasterizer.vertexScreenX[faceY], rasterizer.vertexScreenX[faceZ], shadedtriangleColorsX[index], shadedtriangleColorsY[index], shadedtriangleColorsZ[index]);
-        } else if (type == 1 || ignoreTextures) {
-            int colour = selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[shadedtriangleColorsX[index]];
-            rasterizer.drawGouraudTriangle(rasterizer.vertexScreenY[faceX], rasterizer.vertexScreenY[faceY], rasterizer.vertexScreenY[faceZ], rasterizer.vertexScreenX[faceX],
-                    rasterizer.vertexScreenX[faceY], rasterizer.vertexScreenX[faceZ], colour);
-        } else if (type == 2 || type == 3) {
-
-            int texFaceX = 0, texFaceY = 0, texFaceZ = 0;
-            try {
-                if (faceTexture != null && faceTexture[index] != -1) {
-                    int k1 = faceTexture[index] & 0xFF;
-                    texFaceX = texIndices1[k1];
-                    texFaceY = texIndices2[k1];
-                    texFaceZ = texIndices3[k1];
+        if (translucent || selected) {
+            rasterizer.drawFlatTriangle(rasterizer.vertexScreenY[triangleX], rasterizer.vertexScreenY[triangleY], rasterizer.vertexScreenY[triangleZ],
+                    rasterizer.vertexScreenX[triangleX], rasterizer.vertexScreenX[triangleY], rasterizer.vertexScreenX[triangleZ],
+                    selected ? 0xc5dce6 : 16118771);
+        } else {
+            if (faceTextures != null && faceTextures[idx] != -1) {
+                int textureX;
+                int textureY;
+                int textureZ;
+                if (textureCoords != null && textureCoords[idx] != -1) {
+                    int coordinate = textureCoords[idx] & 0xff;
+                    textureX = texTriangleX[coordinate];
+                    textureY = texTriangleY[coordinate];
+                    textureZ = texTriangleZ[coordinate];
                 } else {
-                    texFaceX = faceX;
-                    texFaceY = faceY;
-                    texFaceZ = faceZ;
-
+                    textureX = triangleX;
+                    textureY = triangleY;
+                    textureZ = triangleZ;
                 }
 
-                if (texFaceX >= 4096 || texFaceY >= 4096 || texFaceZ >= 4096) {
-                    texFaceX = faceX;
-                    texFaceY = faceY;
-                    texFaceZ = faceZ;
+                if (colorsZ[idx] == -1) {
+                    rasterizer.drawTexturedTriangle_Model(
+                            rasterizer.vertexScreenY[triangleX], rasterizer.vertexScreenY[triangleY], rasterizer.vertexScreenY[triangleZ],
+                            rasterizer.vertexScreenX[triangleX], rasterizer.vertexScreenX[triangleY], rasterizer.vertexScreenX[triangleZ],
+                            colorsX[idx], colorsX[idx], colorsX[idx],
+                            rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ],
+                            rasterizer.camera_vertex_y[textureX], rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ],
+                            rasterizer.camera_vertex_z[textureX], rasterizer.camera_vertex_z[textureY], rasterizer.camera_vertex_z[textureZ],
+                            faceTextures[idx]);
+                } else {
+                    rasterizer.drawTexturedTriangle_Model(
+                            rasterizer.vertexScreenY[triangleX], rasterizer.vertexScreenY[triangleY], rasterizer.vertexScreenY[triangleZ],
+                            rasterizer.vertexScreenX[triangleX], rasterizer.vertexScreenX[triangleY], rasterizer.vertexScreenX[triangleZ],
+                            colorsX[idx], colorsY[idx], colorsZ[idx],
+                            rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ],
+                            rasterizer.camera_vertex_y[textureX], rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ],
+                            rasterizer.camera_vertex_z[textureX], rasterizer.camera_vertex_z[textureY], rasterizer.camera_vertex_z[textureZ],
+                            faceTextures[idx]);
                 }
-
-                int colourX = shadedtriangleColorsX[index];
-                int colourY = shadedtriangleColorsX[index];
-                int colourZ = shadedtriangleColorsX[index];
-
-                if (type == 2) {
-                    colourY = shadedtriangleColorsY[index];
-                    colourZ = shadedtriangleColorsZ[index];
+            } else if (colorsZ[idx] == -1) {
+                rasterizer.drawFlatTriangle(rasterizer.vertexScreenY[triangleX], rasterizer.vertexScreenY[triangleY], rasterizer.vertexScreenY[triangleZ],
+                        rasterizer.vertexScreenX[triangleX], rasterizer.vertexScreenX[triangleY], rasterizer.vertexScreenX[triangleZ],
+                        rasterizer.colourPalette[colorsX[idx]]);
+            } else {
+                if (type == 0) {
+                    rasterizer.drawGouraudTriangle(rasterizer.vertexScreenY[triangleX], rasterizer.vertexScreenY[triangleY],
+                            rasterizer.vertexScreenY[triangleZ], rasterizer.vertexScreenX[triangleX], rasterizer.vertexScreenX[triangleY],
+                            rasterizer.vertexScreenX[triangleZ], colorsX[idx], colorsY[idx],
+                            colorsZ[idx]);
                 }
-
-                int texId = faceMaterial[index];
-                //texId = 23;
-                rasterizer.drawTexturedTriangle_Model(
-                        rasterizer.vertexScreenY[faceX],
-                        rasterizer.vertexScreenY[faceY],
-                        rasterizer.vertexScreenY[faceZ],
-                        rasterizer.vertexScreenX[faceX],
-                        rasterizer.vertexScreenX[faceY],
-                        rasterizer.vertexScreenX[faceZ],
-                        colourX, colourY, colourZ,
-                        rasterizer.camera_vertex_x[texFaceX],
-                        rasterizer.camera_vertex_x[texFaceY],
-                        rasterizer.camera_vertex_x[texFaceZ],
-                        rasterizer.camera_vertex_y[texFaceX],
-                        rasterizer.camera_vertex_y[texFaceY],
-                        rasterizer.camera_vertex_y[texFaceZ],
-                        rasterizer.camera_vertex_z[texFaceX],
-                        rasterizer.camera_vertex_z[texFaceY],
-                        rasterizer.camera_vertex_z[texFaceZ],
-                        texId);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.info("{} {} {} | {} {} {}", faceX, faceY, faceZ, texFaceX, texFaceY, texFaceZ);
             }
         }
     }
 
-    private void method485(GameRasterizer rasterizer, int index) {
-
-        boolean ignoreTextures = translucent || selected;
-
+    private void method485(GameRasterizer rasterizer, int idx) {
         int viewX = rasterizer.viewCenter.getX();
         int viewY = rasterizer.viewCenter.getY();
         int l = 0;
-        int faceX = faceIndices1[index];
-        int faceY = faceIndices2[index];
-        int faceZ = faceIndices3[index];
-        int l1 = rasterizer.camera_vertex_z[faceX];
-        int i2 = rasterizer.camera_vertex_z[faceY];
-        int j2 = rasterizer.camera_vertex_z[faceZ];
+        int i1 = trianglePointsX[idx];
+        int j1 = trianglePointsY[idx];
+        int k1 = trianglePointsZ[idx];
+        int l1 = rasterizer.camera_vertex_z[i1];
+        int i2 = rasterizer.camera_vertex_z[j1];
+        int j2 = rasterizer.camera_vertex_z[k1];
         if (l1 >= 50) {
-            rasterizer.anIntArray1678[l] = rasterizer.vertexScreenX[faceX];
-            rasterizer.anIntArray1679[l] = rasterizer.vertexScreenY[faceX];
-            rasterizer.anIntArray1680[l++] = shadedtriangleColorsX[index];
+            rasterizer.anIntArray1678[l] = rasterizer.vertexScreenX[i1];
+            rasterizer.anIntArray1679[l] = rasterizer.vertexScreenY[i1];
+            rasterizer.anIntArray1680[l++] = colorsX[idx];
         } else {
-            int k2 = rasterizer.camera_vertex_x[faceX];
-            int k3 = rasterizer.camera_vertex_y[faceX];
-            int k4 = shadedtriangleColorsX[index];
+            int k2 = rasterizer.camera_vertex_x[i1];
+            int k3 = rasterizer.camera_vertex_y[i1];
+            int k4 = colorsX[idx];
             if (j2 >= 50) {
                 int k5 = (50 - l1) * Constants.LIGHT_DECAY[j2 - l1];
-                rasterizer.anIntArray1678[l] = viewX + (k2 + ((rasterizer.camera_vertex_x[faceZ] - k2) * k5 >> 16) << 9) / 50;
-                rasterizer.anIntArray1679[l] = viewY + (k3 + ((rasterizer.camera_vertex_y[faceZ] - k3) * k5 >> 16) << 9) / 50;
-                rasterizer.anIntArray1680[l++] = k4 + ((shadedtriangleColorsZ[index] - k4) * k5 >> 16);
+                rasterizer.anIntArray1678[l] = viewX + (k2 + ((rasterizer.camera_vertex_x[k1] - k2) * k5 >> 16) << 9) / 50;
+                rasterizer.anIntArray1679[l] = viewY + (k3 + ((rasterizer.camera_vertex_y[k1] - k3) * k5 >> 16) << 9) / 50;
+                rasterizer.anIntArray1680[l++] = k4 + ((colorsZ[idx] - k4) * k5 >> 16);
             }
             if (i2 >= 50) {
                 int l5 = (50 - l1) * Constants.LIGHT_DECAY[i2 - l1];
-                rasterizer.anIntArray1678[l] = viewX + (k2 + ((rasterizer.camera_vertex_x[faceY] - k2) * l5 >> 16) << 9) / 50;
-                rasterizer.anIntArray1679[l] = viewY + (k3 + ((rasterizer.camera_vertex_y[faceY] - k3) * l5 >> 16) << 9) / 50;
-                rasterizer.anIntArray1680[l++] = k4 + ((shadedtriangleColorsY[index] - k4) * l5 >> 16);
+                rasterizer.anIntArray1678[l] = viewX + (k2 + ((rasterizer.camera_vertex_x[j1] - k2) * l5 >> 16) << 9) / 50;
+                rasterizer.anIntArray1679[l] = viewY + (k3 + ((rasterizer.camera_vertex_y[j1] - k3) * l5 >> 16) << 9) / 50;
+                rasterizer.anIntArray1680[l++] = k4 + ((colorsY[idx] - k4) * l5 >> 16);
             }
         }
         if (i2 >= 50) {
-            rasterizer.anIntArray1678[l] = rasterizer.vertexScreenX[faceY];
-            rasterizer.anIntArray1679[l] = rasterizer.vertexScreenY[faceY];
-            rasterizer.anIntArray1680[l++] = shadedtriangleColorsY[index];
+            rasterizer.anIntArray1678[l] = rasterizer.vertexScreenX[j1];
+            rasterizer.anIntArray1679[l] = rasterizer.vertexScreenY[j1];
+            rasterizer.anIntArray1680[l++] = colorsY[idx];
         } else {
-            int l2 = rasterizer.camera_vertex_x[faceY];
-            int l3 = rasterizer.camera_vertex_y[faceY];
-            int l4 = shadedtriangleColorsY[index];
+            int l2 = rasterizer.camera_vertex_x[j1];
+            int l3 = rasterizer.camera_vertex_y[j1];
+            int l4 = colorsY[idx];
             if (l1 >= 50) {
                 int i6 = (50 - i2) * Constants.LIGHT_DECAY[l1 - i2];
-                rasterizer.anIntArray1678[l] = viewX + (l2 + ((rasterizer.camera_vertex_x[faceX] - l2) * i6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1679[l] = viewY + (l3 + ((rasterizer.camera_vertex_y[faceX] - l3) * i6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1680[l++] = l4 + ((shadedtriangleColorsX[index] - l4) * i6 >> 16);
+                rasterizer.anIntArray1678[l] = viewX + (l2 + ((rasterizer.camera_vertex_x[i1] - l2) * i6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1679[l] = viewY + (l3 + ((rasterizer.camera_vertex_y[i1] - l3) * i6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1680[l++] = l4 + ((colorsX[idx] - l4) * i6 >> 16);
             }
             if (j2 >= 50) {
                 int j6 = (50 - i2) * Constants.LIGHT_DECAY[j2 - i2];
-                rasterizer.anIntArray1678[l] = viewX + (l2 + ((rasterizer.camera_vertex_x[faceZ] - l2) * j6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1679[l] = viewY + (l3 + ((rasterizer.camera_vertex_y[faceZ] - l3) * j6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1680[l++] = l4 + ((shadedtriangleColorsZ[index] - l4) * j6 >> 16);
+                rasterizer.anIntArray1678[l] = viewX + (l2 + ((rasterizer.camera_vertex_x[k1] - l2) * j6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1679[l] = viewY + (l3 + ((rasterizer.camera_vertex_y[k1] - l3) * j6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1680[l++] = l4 + ((colorsZ[idx] - l4) * j6 >> 16);
             }
         }
         if (j2 >= 50) {
-            rasterizer.anIntArray1678[l] = rasterizer.vertexScreenX[faceZ];
-            rasterizer.anIntArray1679[l] = rasterizer.vertexScreenY[faceZ];
-            rasterizer.anIntArray1680[l++] = shadedtriangleColorsZ[index];
+            rasterizer.anIntArray1678[l] = rasterizer.vertexScreenX[k1];
+            rasterizer.anIntArray1679[l] = rasterizer.vertexScreenY[k1];
+            rasterizer.anIntArray1680[l++] = colorsZ[idx];
         } else {
-            int i3 = rasterizer.camera_vertex_x[faceZ];
-            int i4 = rasterizer.camera_vertex_y[faceZ];
-            int i5 = shadedtriangleColorsZ[index];
+            int i3 = rasterizer.camera_vertex_x[k1];
+            int i4 = rasterizer.camera_vertex_y[k1];
+            int i5 = colorsZ[idx];
             if (i2 >= 50) {
                 int k6 = (50 - j2) * Constants.LIGHT_DECAY[i2 - j2];
-                rasterizer.anIntArray1678[l] = viewX + (i3 + ((rasterizer.camera_vertex_x[faceY] - i3) * k6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1679[l] = viewY + (i4 + ((rasterizer.camera_vertex_y[faceY] - i4) * k6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1680[l++] = i5 + ((shadedtriangleColorsY[index] - i5) * k6 >> 16);
+                rasterizer.anIntArray1678[l] = viewX + (i3 + ((rasterizer.camera_vertex_x[j1] - i3) * k6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1679[l] = viewY + (i4 + ((rasterizer.camera_vertex_y[j1] - i4) * k6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1680[l++] = i5 + ((colorsY[idx] - i5) * k6 >> 16);
             }
             if (l1 >= 50) {
                 int l6 = (50 - j2) * Constants.LIGHT_DECAY[l1 - j2];
-                rasterizer.anIntArray1678[l] = viewX + (i3 + ((rasterizer.camera_vertex_x[faceX] - i3) * l6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1679[l] = viewY + (i4 + ((rasterizer.camera_vertex_y[faceX] - i4) * l6 >> 16) << 9) / 50;
-                rasterizer.anIntArray1680[l++] = i5 + ((shadedtriangleColorsX[index] - i5) * l6 >> 16);
+                rasterizer.anIntArray1678[l] = viewX + (i3 + ((rasterizer.camera_vertex_x[i1] - i3) * l6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1679[l] = viewY + (i4 + ((rasterizer.camera_vertex_y[i1] - i4) * l6 >> 16) << 9) / 50;
+                rasterizer.anIntArray1680[l++] = i5 + ((colorsX[idx] - i5) * l6 >> 16);
             }
         }
         int j3 = rasterizer.anIntArray1678[0];
@@ -1236,157 +1072,110 @@ public class Mesh extends Renderable {
         int i7 = rasterizer.anIntArray1679[0];
         int j7 = rasterizer.anIntArray1679[1];
         int k7 = rasterizer.anIntArray1679[2];
+        boolean ignoreTextures = translucent || selected;
         if ((j3 - j4) * (k7 - j7) - (i7 - j7) * (j5 - j4) > 0) {
             rasterizer.restrictEdges = false;
+            int textureX = i1;
+            int textureY = j1;
+            int textureZ = k1;
             if (l == 3) {
-                if (j3 < 0 || j4 < 0 || j5 < 0 || j3 > rasterizer.getMaxRight() || j4 > rasterizer.getMaxRight()
-                        || j5 > rasterizer.getMaxRight()) {
+                if (j3 < 0 || j4 < 0 || j5 < 0 || j3 > rasterizer.getMaxRight() || j4 > rasterizer.getMaxRight() || j5 > rasterizer.getMaxRight()) {
                     rasterizer.restrictEdges = true;
                 }
+
                 int type;
-                if (triangleInfo == null) {
-                    type = faceMaterial != null && faceMaterial[index] != -1 ? 2 : 0;
+                if (faceRenderType == null) {
+                    type = 0;
                 } else {
-                    type = triangleInfo[index] & 3;
+                    type = faceRenderType[idx] & 3;
                 }
 
-                if (type == 0 && !ignoreTextures) {
-                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
-                            rasterizer.anIntArray1680[2]);
-                } else if (type == 1 || ignoreTextures) {
-                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5,
-                            selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[shadedtriangleColorsX[index]]);
-                } else if (type == 2) {
-                    int texFaceX, texFaceY, texFaceZ;
-                    if (faceTexture != null && faceTexture[index] != -1) {
-                        int texFaceIndex = faceTexture[index] & 0xFF;
-                        texFaceX = texIndices1[texFaceIndex];
-                        texFaceY = texIndices2[texFaceIndex];
-                        texFaceZ = texIndices3[texFaceIndex];
+                if (ignoreTextures) {
+                    rasterizer.drawFlatTriangle(i7, j7, k7, j3, j4, j5, selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[colorsX[idx]]);
+                } else {
+                    if (faceTextures != null && faceTextures[idx] != -1) {
+                        if (textureCoords != null && textureCoords[idx] != -1) {
+                            int coordinate = textureCoords[idx] & 0xff;
+                            textureX = texTriangleX[coordinate];
+                            textureY = texTriangleY[coordinate];
+                            textureZ = texTriangleZ[coordinate];
+                        }
+
+                        if (colorsZ[idx] == -1) {
+                            rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1], rasterizer.anIntArray1680[2],
+                                    rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ], rasterizer.camera_vertex_y[textureX],
+                                    rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ], rasterizer.camera_vertex_z[textureX], rasterizer.camera_vertex_z[textureY],
+                                    rasterizer.camera_vertex_z[textureZ], faceTextures[idx]);
+                        } else {
+                            rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, colorsX[idx], colorsX[idx], colorsX[idx],
+                                    rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ], rasterizer.camera_vertex_y[textureX],
+                                    rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ], rasterizer.camera_vertex_z[textureX], rasterizer.camera_vertex_z[textureY],
+                                    rasterizer.camera_vertex_z[textureZ], faceTextures[idx]);
+                        }
+                    } else if (colorsZ[idx] == -1) {
+                        rasterizer.drawFlatTriangle(i7, j7, k7, j3, j4, j5, rasterizer.colourPalette[colorsX[idx]]);
                     } else {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
+                        if (type == 0) {
+                            rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1], rasterizer.anIntArray1680[2]);
+                        }
                     }
-
-
-                    if (texFaceX >= 4096 || texFaceY >= 4096 || texFaceZ >= 4096) {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
-                    }
-
-                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
-                            rasterizer.anIntArray1680[2], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
-                            rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
-                            rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
-                } else if (type == 3) {
-                    int texFaceX, texFaceY, texFaceZ;
-                    if (faceTexture != null && faceTexture[index] != -1) {
-                        int texFaceIndex = faceTexture[index] & 0xFF;
-                        texFaceX = texIndices1[texFaceIndex];
-                        texFaceY = texIndices2[texFaceIndex];
-                        texFaceZ = texIndices3[texFaceIndex];
-                    } else {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
-                    }
-
-
-                    if (texFaceX >= 4096 || texFaceY >= 4096 || texFaceZ >= 4096) {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
-                    }
-
-                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, shadedtriangleColorsX[index], shadedtriangleColorsX[index],
-                            shadedtriangleColorsX[index], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
-                            rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
-                            rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
                 }
             }
             if (l == 4) {
-                if (j3 < 0 || j4 < 0 || j5 < 0 || j3 > rasterizer.getMaxRight() || j4 > rasterizer.getMaxRight() || j5 > rasterizer.getMaxRight()
-                        || rasterizer.anIntArray1678[3] < 0 || rasterizer.anIntArray1678[3] > rasterizer.getMaxRight()) {
+                if (j3 < 0 || j4 < 0 || j5 < 0 || j3 > rasterizer.getMaxRight() || j4 > rasterizer.getMaxRight() || j5 > rasterizer.getMaxRight() || rasterizer.anIntArray1678[3] < 0
+                        || rasterizer.anIntArray1678[3] > rasterizer.getMaxRight()) {
                     rasterizer.restrictEdges = true;
                 }
+
                 int type;
-                if (triangleInfo == null) {
-                    type = faceMaterial != null && faceMaterial[index] != -1 ? 2 : 0;
+                if (faceRenderType == null) {
+                    type = 0;
                 } else {
-                    type = triangleInfo[index] & 3;
+                    type = faceRenderType[idx] & 3;
                 }
-                if (type == 0 && !ignoreTextures) {
-                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
-                            rasterizer.anIntArray1680[2]);
-                    rasterizer.drawGouraudTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
-                            rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[2], rasterizer.anIntArray1680[3]);
-                    return;
-                } else if (type == 1 || ignoreTextures) {
-                    int l8 = selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[shadedtriangleColorsX[index]];
-                    rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, l8);
-                    rasterizer.drawGouraudTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], l8);
-                    return;
-                } else if (type == 2) {
-                    int texFaceX, texFaceY, texFaceZ;
-                    if (faceTexture != null && faceTexture[index] != -1) {
-                        int texFaceIndex = faceTexture[index] & 0xFF;
-                        texFaceX = texIndices1[texFaceIndex];
-                        texFaceY = texIndices2[texFaceIndex];
-                        texFaceZ = texIndices3[texFaceIndex];
+
+                if (ignoreTextures) {
+                    int l8 = selected ? 0xc5dce6 : translucent ? 16118771 : rasterizer.colourPalette[colorsX[idx]];
+                    rasterizer.drawFlatTriangle(i7, j7, k7, j3, j4, j5, l8);
+                    rasterizer.drawFlatTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], l8);
+                } else {
+                    if (faceTextures != null && faceTextures[idx] != -1) {
+                        if (textureCoords != null && textureCoords[idx] != -1) {
+                            int coordinate = textureCoords[idx] & 0xff;
+                            textureX = texTriangleX[coordinate];
+                            textureY = texTriangleY[coordinate];
+                            textureZ = texTriangleZ[coordinate];
+                        }
+
+                        if (colorsZ[idx] == -1) {
+                            rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1], rasterizer.anIntArray1680[2],
+                                    rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ], rasterizer.camera_vertex_y[textureX],
+                                    rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ], rasterizer.camera_vertex_z[textureX], rasterizer.camera_vertex_z[textureY],
+                                    rasterizer.camera_vertex_z[textureZ], faceTextures[idx]);
+                            rasterizer.drawTexturedTriangle_Model(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[2],
+                                    rasterizer.anIntArray1680[3], rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ],
+                                    rasterizer.camera_vertex_y[textureX], rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ], rasterizer.camera_vertex_z[textureX],
+                                    rasterizer.camera_vertex_z[textureY], rasterizer.camera_vertex_z[textureZ], faceTextures[idx]);
+                        } else {
+                            rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, colorsX[idx], colorsX[idx], colorsX[idx],
+                                    rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ], rasterizer.camera_vertex_y[textureX],
+                                    rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ], rasterizer.camera_vertex_z[textureX], rasterizer.camera_vertex_z[textureY],
+                                    rasterizer.camera_vertex_z[textureZ], faceTextures[idx]);
+                            rasterizer.drawTexturedTriangle_Model(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], colorsX[idx], colorsX[idx],
+                                    colorsX[idx], rasterizer.camera_vertex_x[textureX], rasterizer.camera_vertex_x[textureY], rasterizer.camera_vertex_x[textureZ],
+                                    rasterizer.camera_vertex_y[textureX], rasterizer.camera_vertex_y[textureY], rasterizer.camera_vertex_y[textureZ], rasterizer.camera_vertex_z[textureX],
+                                    rasterizer.camera_vertex_z[textureY], rasterizer.camera_vertex_z[textureZ], faceTextures[idx]);
+                        }
+                    } else if (colorsZ[idx] == -1) {
+                        int l8 = rasterizer.colourPalette[colorsX[idx]];
+                        rasterizer.drawFlatTriangle(i7, j7, k7, j3, j4, j5, l8);
+                        rasterizer.drawFlatTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], l8);
                     } else {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
+                        if (type == 0) {
+                            rasterizer.drawGouraudTriangle(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1], rasterizer.anIntArray1680[2]);
+                            rasterizer.drawGouraudTriangle(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3], rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[2], rasterizer.anIntArray1680[3]);
+                        }
                     }
-
-
-                    if (texFaceX >= 4096 || texFaceY >= 4096 || texFaceZ >= 4096) {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
-                    }
-
-                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[1],
-                            rasterizer.anIntArray1680[2], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
-                            rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
-                            rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
-                    rasterizer.drawTexturedTriangle_Model(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
-                            rasterizer.anIntArray1680[0], rasterizer.anIntArray1680[2], rasterizer.anIntArray1680[3], rasterizer.camera_vertex_x[texFaceX],
-                            rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ], rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY],
-                            rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX], rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ],
-                            faceMaterial[index]);
-                    return;
-                } else if (type == 3) {
-                    int texFaceX, texFaceY, texFaceZ;
-                    if (faceTexture != null && faceTexture[index] != -1) {
-                        int texFaceIndex = faceTexture[index] & 0xFF;
-                        texFaceX = texIndices1[texFaceIndex];
-                        texFaceY = texIndices2[texFaceIndex];
-                        texFaceZ = texIndices3[texFaceIndex];
-                    } else {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
-                    }
-
-
-                    if (texFaceX >= 4096 || texFaceY >= 4096 || texFaceZ >= 4096) {
-                        texFaceX = faceX;
-                        texFaceY = faceY;
-                        texFaceZ = faceZ;
-                    }
-
-                    rasterizer.drawTexturedTriangle_Model(i7, j7, k7, j3, j4, j5, shadedtriangleColorsX[index], shadedtriangleColorsX[index],
-                            shadedtriangleColorsX[index], rasterizer.camera_vertex_x[texFaceX], rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ],
-                            rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY], rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX],
-                            rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ], faceMaterial[index]);
-                    rasterizer.drawTexturedTriangle_Model(i7, k7, rasterizer.anIntArray1679[3], j3, j5, rasterizer.anIntArray1678[3],
-                            shadedtriangleColorsX[index], shadedtriangleColorsX[index], shadedtriangleColorsX[index], rasterizer.camera_vertex_x[texFaceX],
-                            rasterizer.camera_vertex_x[texFaceY], rasterizer.camera_vertex_x[texFaceZ], rasterizer.camera_vertex_y[texFaceX], rasterizer.camera_vertex_y[texFaceY],
-                            rasterizer.camera_vertex_y[texFaceZ], rasterizer.camera_vertex_z[texFaceX], rasterizer.camera_vertex_z[texFaceY], rasterizer.camera_vertex_z[texFaceZ],
-                            faceMaterial[index]);
                 }
             }
         }
@@ -1396,20 +1185,20 @@ public class Mesh extends Renderable {
         int sin = Constants.SINE[theta];
         int cos = Constants.COSINE[theta];
 
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            int y = vertexY[vertex] * cos - vertexZ[vertex] * sin >> 16;
-            vertexZ[vertex] = vertexY[vertex] * sin + vertexZ[vertex] * cos >> 16;
-            vertexY[vertex] = y;
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            int y = verticesY[vertex] * cos - verticesZ[vertex] * sin >> 16;
+            verticesZ[vertex] = verticesY[vertex] * sin + verticesZ[vertex] * cos >> 16;
+            verticesY[vertex] = y;
         }
     }
 
     public void prepareSkeleton() {
-        if (packedVertexGroups != null) {
+        if (vertexSkins != null) {
             int[] sizes = new int[256];
             int maximumBoneId = 0;
 
-            for (int vertex = 0; vertex < vertexCount; vertex++) {
-                int bone = packedVertexGroups[vertex];
+            for (int vertex = 0; vertex < verticesCount; vertex++) {
+                int bone = vertexSkins[vertex];
                 sizes[bone]++;
 
                 if (bone > maximumBoneId) {
@@ -1423,20 +1212,20 @@ public class Mesh extends Renderable {
                 sizes[index] = 0;
             }
 
-            for (int index = 0; index < vertexCount; index++) {
-                int bone = packedVertexGroups[index];
+            for (int index = 0; index < verticesCount; index++) {
+                int bone = vertexSkins[index];
                 vertexGroups[bone][sizes[bone]++] = index;
             }
 
-            packedVertexGroups = null;
+            vertexSkins = null;
         }
 
-        if (packedTransparencyVertexGroups != null) {
+        if (triangleSkinValues != null) {
             int[] sizes = new int[256];
             int count = 0;
 
-            for (int index = 0; index < triangleCount; index++) {
-                int skin = packedTransparencyVertexGroups[index];
+            for (int index = 0; index < triangleFaceCount; index++) {
+                int skin = triangleSkinValues[index];
                 sizes[skin]++;
 
                 if (skin > count) {
@@ -1450,19 +1239,19 @@ public class Mesh extends Renderable {
                 sizes[index] = 0;
             }
 
-            for (int index = 0; index < triangleCount; index++) {
-                int skin = packedTransparencyVertexGroups[index];
+            for (int index = 0; index < triangleFaceCount; index++) {
+                int skin = triangleSkinValues[index];
                 faceGroups[skin][sizes[skin]++] = index;
             }
 
-            packedTransparencyVertexGroups = null;
+            triangleSkinValues = null;
         }
     }
 
     public void recolour(int oldColour, int newColour) {
-        for (int index = 0; index < triangleCount; index++) {
-            if (triangleColors[index] == oldColour) {
-                triangleColors[index] = newColour;
+        for (int index = 0; index < triangleFaceCount; index++) {
+            if (faceColors[index] == oldColour) {
+                faceColors[index] = newColour;
             }
         }
     }
@@ -1479,10 +1268,10 @@ public class Mesh extends Renderable {
         int sinXWorld = Constants.SINE[pitch];
         int cosXWorld = Constants.COSINE[pitch];
         int j4 = transY * sinXWorld + transZ * cosXWorld >> 16;
-        for (int k4 = 0; k4 < vertexCount; k4++) {
-            int x = vertexX[k4];
-            int y = vertexY[k4];
-            int z = vertexZ[k4];
+        for (int k4 = 0; k4 < verticesCount; k4++) {
+            int x = verticesX[k4];
+            int y = verticesY[k4];
+            int z = verticesZ[k4];
             if (yaw != 0) {
                 int k5 = y * j3 + x * k3 >> 16;
                 y = y * k3 - x * j3 >> 16;
@@ -1507,7 +1296,7 @@ public class Mesh extends Renderable {
             rasterizer.vertexScreenZ[k4] = z - j4;
             rasterizer.vertexScreenX[k4] = viewX + (x << 9) / z;
             rasterizer.vertexScreenY[k4] = viewY + (y << 9) / z;
-            if (numTextureFaces > 0) {
+            if (texturesCount > 0) {
                 rasterizer.camera_vertex_x[k4] = x;
                 rasterizer.camera_vertex_y[k4] = y;
                 rasterizer.camera_vertex_z[k4] = z;
@@ -1559,39 +1348,37 @@ public class Mesh extends Renderable {
         }
 
         boolean flag1 = false;
-        if (key != null && aBoolean1684 || true) {
-            int k5 = k2 - l2;
-            if (k5 <= 50) {
-                k5 = 50;
-            }
+        int k5 = k2 - l2;
+        if (k5 <= 50) {
+            k5 = 50;
+        }
 
-            if (j3 > 0) {
-                sceneLowerX /= i3;
-                sceneMaximumX /= k5;
-            } else {
-                sceneMaximumX /= i3;
-                sceneLowerX /= k5;
-            }
+        if (j3 > 0) {
+            sceneLowerX /= i3;
+            sceneMaximumX /= k5;
+        } else {
+            sceneMaximumX /= i3;
+            sceneLowerX /= k5;
+        }
 
-            if (i4 > 0) {
-                sceneLowerY /= i3;
-                sceneMaximumY /= k5;
-            } else {
-                sceneMaximumY /= i3;
-                sceneLowerY /= k5;
-            }
+        if (i4 > 0) {
+            sceneLowerY /= i3;
+            sceneMaximumY /= k5;
+        } else {
+            sceneMaximumY /= i3;
+            sceneLowerY /= k5;
+        }
 
-            int mouseSceneX = mouseX - rasterizer.viewCenter.getX();
-            int mouseSceneY = mouseY - rasterizer.viewCenter.getY();
-
-            if (mouseSceneX > sceneLowerX && mouseSceneX < sceneMaximumX && mouseSceneY > sceneLowerY && mouseSceneY < sceneMaximumY) {
-                if (fitsOnSingleSquare) {
-                    resourceIDTag[resourceCount++] = key;
-                    if (Client.hoveredUID == null)
-                        Client.hoveredUID = key;
-                } else {
-                    flag1 = true;
+        int mouseSceneX = mouseX - rasterizer.viewCenter.getX();
+        int mouseSceneY = mouseY - rasterizer.viewCenter.getY();
+        if (mouseSceneX > sceneLowerX && mouseSceneX < sceneMaximumX && mouseSceneY > sceneLowerY && mouseSceneY < sceneMaximumY) {
+            if (fitsOnSingleSquare) {
+                resourceIDTag[resourceCount++] = key;
+                if (Client.hoveredUID == null) {
+                    Client.hoveredUID = key;
                 }
+            } else {
+                flag1 = true;
             }
         }
 
@@ -1605,10 +1392,10 @@ public class Mesh extends Renderable {
             cosine = Constants.COSINE[orientation];
         }
 
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            int xVertex = vertexX[vertex];
-            int yVertex = vertexY[vertex];
-            int zVertex = vertexZ[vertex];
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            int xVertex = verticesX[vertex];
+            int yVertex = verticesY[vertex];
+            int zVertex = verticesZ[vertex];
             if (orientation != 0) {
                 int j8 = zVertex * sine + xVertex * cosine >> 16;
                 zVertex = zVertex * cosine - xVertex * sine >> 16;
@@ -1634,7 +1421,7 @@ public class Mesh extends Renderable {
                 flag = true;
             }
 
-            if (flag || numTextureFaces > 0) {
+            if (flag || texturesCount > 0) {
                 rasterizer.camera_vertex_x[vertex] = xVertex;
                 rasterizer.camera_vertex_y[vertex] = yVertex;
                 rasterizer.camera_vertex_z[vertex] = zVertex;
@@ -1649,94 +1436,27 @@ public class Mesh extends Renderable {
     }
 
     public void rotateClockwise() {
-        for (int index = 0; index < vertexCount; index++) {
-            int x = vertexX[index];
-            vertexX[index] = vertexZ[index];
-            vertexZ[index] = -x;
+        for (int index = 0; index < verticesCount; index++) {
+            int x = verticesX[index];
+            verticesX[index] = verticesZ[index];
+            verticesZ[index] = -x;
         }
     }
 
     public void offsetVertices(int x, int y, int z) {
-        for (int index = 0; index < vertexCount; index++) {
-            vertexX[index] += x;
-            vertexX[index] += y;
-            vertexZ[index] += z;
+        for (int index = 0; index < verticesCount; index++) {
+            verticesX[index] += x;
+            verticesX[index] += y;
+            verticesZ[index] += z;
         }
     }
 
     public void scale(int x, int y, int z) {
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            vertexX[vertex] = vertexX[vertex] * x / 128;
-            vertexY[vertex] = vertexY[vertex] * z / 128;
-            vertexZ[vertex] = vertexZ[vertex] * y / 128;
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            verticesX[vertex] = verticesX[vertex] * x / 128;
+            verticesY[vertex] = verticesY[vertex] * z / 128;
+            verticesZ[vertex] = verticesZ[vertex] * y / 128;
         }
-    }
-
-    public void scale2(int i) {
-        for (int i1 = 0; i1 < vertexCount; i1++) {
-            vertexX[i1] = vertexX[i1] / i;
-            vertexY[i1] = vertexY[i1] / i;
-            vertexZ[i1] = vertexZ[i1] / i;
-        }
-    }
-
-
-    public final void shade(int lighting, int j, int x, int y, int z) {
-        for (int face = 0; face < triangleCount; face++) {
-            int indexX = faceIndices1[face];
-            int indexY = faceIndices2[face];
-            int indexZ = faceIndices3[face];
-
-            if (triangleInfo == null) {
-                int colour = triangleColors[face];
-                VertexNormal normal = super.normals[indexX];
-
-                int light = lighting
-                        + (x * normal.getX() + y * normal.getY() + z * normal.getZ()) / (j * normal.getMagnitude());
-                shadedtriangleColorsX[face] = checkedLight(colour, light, 0);
-
-                normal = super.normals[indexY];
-                light = lighting
-                        + (x * normal.getX() + y * normal.getY() + z * normal.getZ()) / (j * normal.getMagnitude());
-                shadedtriangleColorsY[face] = checkedLight(colour, light, 0);
-
-                normal = super.normals[indexZ];
-                light = lighting
-                        + (x * normal.getX() + y * normal.getY() + z * normal.getZ()) / (j * normal.getMagnitude());
-                shadedtriangleColorsZ[face] = checkedLight(colour, light, 0);
-            } else if ((triangleInfo[face] & 1) == 0) {
-                int colour = triangleColors[face];
-                int point = triangleInfo[face];
-
-                VertexNormal normal = super.normals[indexX];
-                int light = lighting
-                        + (x * normal.getX() + y * normal.getY() + z * normal.getZ()) / (j * normal.getMagnitude());
-                shadedtriangleColorsX[face] = checkedLight(colour, light, point);
-                normal = super.normals[indexY];
-
-                light = lighting
-                        + (x * normal.getX() + y * normal.getY() + z * normal.getZ()) / (j * normal.getMagnitude());
-                shadedtriangleColorsY[face] = checkedLight(colour, light, point);
-                normal = super.normals[indexZ];
-
-                light = lighting
-                        + (x * normal.getX() + y * normal.getY() + z * normal.getZ()) / (j * normal.getMagnitude());
-                shadedtriangleColorsZ[face] = checkedLight(colour, light, point);
-            }
-        }
-
-        super.normals = null;
-        normals = null;
-        packedVertexGroups = null;
-        packedTransparencyVertexGroups = null;
-        if (triangleInfo != null) {
-            for (int index = 0; index < triangleCount; index++) {
-                if ((triangleInfo[index] & 2) == 2)
-                    return;
-            }
-        }
-
-        triangleColors = null;
     }
 
     private void transform(int transformation, int[] groups, int dx, int dy, int dz) {
@@ -1751,9 +1471,9 @@ public class Mesh extends Renderable {
                 int group = groups[index];
                 if (group < vertexGroups.length) {
                     for (int vertex : vertexGroups[group]) {
-                        centroidX += vertexX[vertex];
-                        centroidY += vertexY[vertex];
-                        centroidZ += vertexZ[vertex];
+                        centroidX += verticesX[vertex];
+                        centroidY += verticesY[vertex];
+                        centroidZ += verticesZ[vertex];
                         vertices++;
                     }
                 }
@@ -1774,9 +1494,9 @@ public class Mesh extends Renderable {
 
                 if (group < vertexGroups.length) {
                     for (int vertex : vertexGroups[group]) {
-                        vertexX[vertex] += dx;
-                        vertexY[vertex] += dy;
-                        vertexZ[vertex] += dz;
+                        verticesX[vertex] += dx;
+                        verticesY[vertex] += dy;
+                        verticesZ[vertex] += dz;
                     }
                 }
             }
@@ -1786,9 +1506,9 @@ public class Mesh extends Renderable {
 
                 if (group < vertexGroups.length) {
                     for (int vertex : vertexGroups[group]) {
-                        vertexX[vertex] -= centroidX;
-                        vertexY[vertex] -= centroidY;
-                        vertexZ[vertex] -= centroidZ;
+                        verticesX[vertex] -= centroidX;
+                        verticesY[vertex] -= centroidY;
+                        verticesZ[vertex] -= centroidZ;
                         int pitch = (dx & 0xFF) * 8;
                         int roll = (dy & 0xFF) * 8;
                         int yaw = (dz & 0xFF) * 8;
@@ -1796,30 +1516,30 @@ public class Mesh extends Renderable {
                         if (yaw != 0) {
                             int sin = Constants.SINE[yaw];
                             int cos = Constants.COSINE[yaw];
-                            int x = vertexY[vertex] * sin + vertexX[vertex] * cos >> 16;
-                            vertexY[vertex] = vertexY[vertex] * cos - vertexX[vertex] * sin >> 16;
-                            vertexX[vertex] = x;
+                            int x = verticesY[vertex] * sin + verticesX[vertex] * cos >> 16;
+                            verticesY[vertex] = verticesY[vertex] * cos - verticesX[vertex] * sin >> 16;
+                            verticesX[vertex] = x;
                         }
 
                         if (pitch != 0) {
                             int sin = Constants.SINE[pitch];
                             int cos = Constants.COSINE[pitch];
-                            int y = vertexY[vertex] * cos - vertexZ[vertex] * sin >> 16;
-                            vertexZ[vertex] = vertexY[vertex] * sin + vertexZ[vertex] * cos >> 16;
-                            vertexY[vertex] = y;
+                            int y = verticesY[vertex] * cos - verticesZ[vertex] * sin >> 16;
+                            verticesZ[vertex] = verticesY[vertex] * sin + verticesZ[vertex] * cos >> 16;
+                            verticesY[vertex] = y;
                         }
 
                         if (roll != 0) {
                             int sin = Constants.SINE[roll];
                             int cos = Constants.COSINE[roll];
-                            int x = vertexZ[vertex] * sin + vertexX[vertex] * cos >> 16;
-                            vertexZ[vertex] = vertexZ[vertex] * cos - vertexX[vertex] * sin >> 16;
-                            vertexX[vertex] = x;
+                            int x = verticesZ[vertex] * sin + verticesX[vertex] * cos >> 16;
+                            verticesZ[vertex] = verticesZ[vertex] * cos - verticesX[vertex] * sin >> 16;
+                            verticesX[vertex] = x;
                         }
 
-                        vertexX[vertex] += centroidX;
-                        vertexY[vertex] += centroidY;
-                        vertexZ[vertex] += centroidZ;
+                        verticesX[vertex] += centroidX;
+                        verticesY[vertex] += centroidY;
+                        verticesZ[vertex] += centroidZ;
                     }
                 }
             }
@@ -1829,17 +1549,17 @@ public class Mesh extends Renderable {
 
                 if (group < vertexGroups.length) {
                     for (int vertex : vertexGroups[group]) {
-                        vertexX[vertex] -= centroidX;
-                        vertexY[vertex] -= centroidY;
-                        vertexZ[vertex] -= centroidZ;
+                        verticesX[vertex] -= centroidX;
+                        verticesY[vertex] -= centroidY;
+                        verticesZ[vertex] -= centroidZ;
 
-                        vertexX[vertex] = vertexX[vertex] * dx / 128;
-                        vertexY[vertex] = vertexY[vertex] * dy / 128;
-                        vertexZ[vertex] = vertexZ[vertex] * dz / 128;
+                        verticesX[vertex] = verticesX[vertex] * dx / 128;
+                        verticesY[vertex] = verticesY[vertex] * dy / 128;
+                        verticesZ[vertex] = verticesZ[vertex] * dz / 128;
 
-                        vertexX[vertex] += centroidX;
-                        vertexY[vertex] += centroidY;
-                        vertexZ[vertex] += centroidZ;
+                        verticesX[vertex] += centroidX;
+                        verticesY[vertex] += centroidY;
+                        verticesZ[vertex] += centroidZ;
                     }
                 }
             }
@@ -1863,112 +1583,10 @@ public class Mesh extends Renderable {
     }
 
     public void translate(int x, int y, int z) {
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            vertexX[vertex] += x;
-            vertexY[vertex] += y;
-            vertexZ[vertex] += z;
-        }
-    }
-
-    public void convertTexturesToOldFormat() {
-
-        if (faceMaterial == null || faceTexture == null) {
-            return;
-        }
-
-        for (int material : faceMaterial) {
-            if (material > TextureLoader.instance.count()) {
-                return;
-            }
-        }
-
-        if (triangleInfo == null) {
-            triangleInfo = new int[triangleCount];
-        }
-
-        for (int i = 0; i < triangleCount; i++) {
-            if (faceMaterial[i] != -1 && faceTexture[i] >= 0) {
-                int mask = 2 + (faceTexture[i] << 2);
-                triangleInfo[i] = mask;
-                triangleColors[i] = faceMaterial[i];
-            }
-        }
-    }
-
-    public void convertTexturesTo317(int[] textureIds, int[] texa, int[] texb, int[] texc) {
-        int set = 0;
-        int set2 = 0;
-        int max = TextureLoader.instance.count();
-        if (textureIds != null) {
-            texIndices1 = new int[triangleCount];
-            texIndices2 = new int[triangleCount];
-            texIndices3 = new int[triangleCount];
-
-            for (int i = 0; i < triangleCount; i++) {
-                if (textureIds[i] == -1 && this.triangleInfo[i] == 2) {
-                    this.triangleColors[i] = 65535;
-                    triangleInfo[i] = 0;
-                }
-                if (textureIds[i] >= max || textureIds[i] < 0 || textureIds[i] == 39) {
-                    triangleInfo[i] = 0;
-                    continue;
-                }
-                triangleInfo[i] = 2 + set2;
-                set2 += 4;
-                int a = this.faceIndices1[i];
-                int b = faceIndices2[i];
-                int c = faceIndices3[i];
-                triangleColors[i] = textureIds[i];
-
-                int texture_type = -1;
-                if (this.faceTexture != null) {
-                    texture_type = faceTexture[i] & 0xff;
-                    if (texture_type != 0xff)
-                        if (texa[texture_type] >= 4096 || texb[texture_type] >= 4096
-                                || texc[texture_type] >= 4096)
-                            texture_type = -1;
-                }
-                if (texture_type == 0xff)
-                    texture_type = -1;
-
-                texIndices1[set] = texture_type == -1 ? a : texa[texture_type];
-                texIndices2[set] = texture_type == -1 ? b : texb[texture_type];
-                texIndices3[set++] = texture_type == -1 ? c : texc[texture_type];
-
-            }
-            this.numTextureFaces = set;
-        }
-    }
-
-    public void filterTriangles() {
-        for (int triangleId = 0; triangleId < faceIndices1.length; triangleId++) {
-            int l = faceIndices1[triangleId];
-            int k1 = faceIndices2[triangleId];
-            int j2_ = faceIndices3[triangleId];
-            boolean b = true;
-            label2:
-            for (int triId = 0; triId < faceIndices1.length; triId++) {
-                if (triId == triangleId)
-                    continue label2;
-                if (faceIndices1[triId] == l) {
-                    b = false;
-                    break label2;
-                }
-                if (faceIndices2[triId] == k1) {
-                    b = false;
-                    break label2;
-                }
-                if (faceIndices3[triId] == j2_) {
-                    b = false;
-                    break label2;
-                }
-            }
-            if (b) {
-                if (triangleInfo != null)
-                    // face_render_type[triangleId] = -1;
-                    triangleInfo[triangleId] = 255;
-
-            }
+        for (int vertex = 0; vertex < verticesCount; vertex++) {
+            verticesX[vertex] += x;
+            verticesY[vertex] += y;
+            verticesZ[vertex] += z;
         }
     }
 
@@ -1986,85 +1604,91 @@ public class Mesh extends Renderable {
         mesh.maximumX = (model.maximumX);
         mesh.maximumZ = (model.maximumZ);
         mesh.minimumZ = (model.minimumZ);
+        mesh.ambient = (model.ambient);
+        mesh.contrast = (model.contrast);
         mesh.boundingPlaneRadius = (model.boundingPlaneRadius);
         mesh.minimumY = (model.minimumY);
         mesh.boundingSphereRadius = (model.boundingSphereRadius);
         mesh.boundingCylinderRadius = (model.boundingCylinderRadius);
         mesh.anInt1654 = (model.anInt1654);
-        mesh.shadedtriangleColorsX = copyArray(model.shadedtriangleColorsX);
-        mesh.shadedtriangleColorsY = copyArray(model.shadedtriangleColorsY);
-        mesh.shadedtriangleColorsZ = copyArray(model.shadedtriangleColorsZ);
+        mesh.colorsX = copyArray(model.colorsX);
+        mesh.colorsY = copyArray(model.colorsY);
+        mesh.colorsZ = copyArray(model.colorsZ);
         mesh.faceTransparencies = copyArray(model.faceTransparencies);
-        mesh.triangleColors = copyArray(model.triangleColors);
-        mesh.faceMaterial = copyArray(model.faceMaterial);
-        mesh.faceTexture = copyArray(model.faceTexture);
-        mesh.textureMap = copyArray(model.textureMap);
+        mesh.faceColors = copyArray(model.faceColors);
+        mesh.faceTextures = copyArray(model.faceTextures);
+        mesh.textureCoords = copyArray(model.textureCoords);
+        mesh.textureRenderTypes = copyArray(model.textureRenderTypes);
         mesh.faceGroups = copyArray(model.faceGroups);
         mesh.faceRenderPriorities = copyArray(model.faceRenderPriorities);
-        mesh.triangleCount = (model.triangleCount);
-        mesh.packedTransparencyVertexGroups = copyArray(model.packedTransparencyVertexGroups);
-        mesh.faceIndices1 = copyArray(model.faceIndices1);
-        mesh.faceIndices2 = copyArray(model.faceIndices2);
-        mesh.faceIndices3 = copyArray(model.faceIndices3);
-        mesh.normals = (model.normals);
+        mesh.triangleFaceCount = (model.triangleFaceCount);
+        mesh.triangleSkinValues = copyArray(model.triangleSkinValues);
+        mesh.trianglePointsX = copyArray(model.trianglePointsX);
+        mesh.trianglePointsY = copyArray(model.trianglePointsY);
+        mesh.trianglePointsZ = copyArray(model.trianglePointsZ);
+        mesh.vertexNormals = (model.vertexNormals);
+        mesh.vertexNormalsOffsets = (model.vertexNormalsOffsets);
+        mesh.faceNormals = (model.faceNormals);
         mesh.priority = (model.priority);
-        mesh.numTextureFaces = model.numTextureFaces;
-        mesh.texIndices1 = copyArray(model.texIndices1);
-        mesh.texIndices2 = copyArray(model.texIndices2);
-        mesh.texIndices3 = copyArray(model.texIndices3);
-        mesh.triangleInfo = copyArray(model.triangleInfo);
+        mesh.texturesCount = model.texturesCount;
+        mesh.texTriangleX = copyArray(model.texTriangleX);
+        mesh.texTriangleY = copyArray(model.texTriangleY);
+        mesh.texTriangleZ = copyArray(model.texTriangleZ);
+        mesh.faceRenderType = copyArray(model.faceRenderType);
         mesh.vertexGroups = copyArray(model.vertexGroups);
-        mesh.packedVertexGroups = copyArray(model.packedVertexGroups);
-        mesh.vertexX = copyArray(model.vertexX);
-        mesh.vertexY = copyArray(model.vertexY);
-        mesh.vertexZ = copyArray(model.vertexZ);
-        mesh.vertexCount = model.vertexCount;
+        mesh.vertexSkins = copyArray(model.vertexSkins);
+        mesh.verticesX = copyArray(model.verticesX);
+        mesh.verticesY = copyArray(model.verticesY);
+        mesh.verticesZ = copyArray(model.verticesZ);
+        mesh.verticesCount = model.verticesCount;
         return mesh;
     }
 
-    protected static int[] copyArray(int[] a) {
-        if (a == null)
+    protected static short[] copyArray(short[] a) {
+        if (a == null) {
             return null;
+        }
+        return Arrays.copyOf(a, a.length);
+    }
+
+    protected static int[] copyArray(int[] a) {
+        if (a == null) {
+            return null;
+        }
         return Arrays.copyOf(a, a.length);
     }
 
     protected static byte[] copyArray(byte[] a) {
-        if (a == null)
+        if (a == null) {
             return null;
+        }
         return Arrays.copyOf(a, a.length);
     }
 
     protected static int[][] copyArray(int[][] a) {
-        if (a == null)
+        if (a == null) {
             return null;
+        }
         return Arrays.copyOf(a, a.length);
     }
 
-    public int id;
-
-    public void retexture(int found, int replace) {
-        if (faceMaterial != null)
-            for (int face = 0; face < faceMaterial.length; face++) {
-                if (faceMaterial[face] == found) {
-                    log.info("[{}] {} | Replaced {} with {}", id, revision, faceMaterial[face], replace);
-                    faceMaterial[face] = replace;
+    public void retexture(short src, short dst) {
+        if (faceTextures != null) {
+            for (int i = 0; i < faceTextures.length; i++) {
+                if (faceTextures[i] == src) {
+                    faceTextures[i] = dst;
                 }
             }
-
+        }
     }
 
-    protected byte[] faceTexture;
-
-    /*	public List<Triangle> getTriangles() {
-            List<Vertex> vertices = getVertices();
-            return IntStream.of(0, faces).mapToObj(index -> new Triangle(vertices.get(this.faceIndexX[index]), vertices.get(this.faceIndexY[index]), vertices.get(this.faceIndexZ[index]))).collect(Collectors.toList());
-        }
-
-        public List<Vertex> getVertices(){
-            return IntStream.range(0, vertices).mapToObj(index -> new Vertex(this.vertexX[index], this.vertexY[index], this.vertexZ[index])).collect(Collectors.toList());
-        }
-    */
-    @Getter
-    @Setter
-    private int sceneId;
+    private static boolean insideTriangle(int x, int y, int k, int l, int i1, int j1, int k1, int l1) {
+        if (y < k && y < l && y < i1)
+            return false;
+        if (y > k && y > l && y > i1)
+            return false;
+        if (x < j1 && x < k1 && x < l1)
+            return false;
+        return x <= j1 || x <= k1 || x <= l1;
+    }
 }

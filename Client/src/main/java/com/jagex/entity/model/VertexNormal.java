@@ -13,4 +13,11 @@ public class VertexNormal {
     public VertexNormal() {
 
     }
+
+    public VertexNormal(VertexNormal other) {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+        this.magnitude = other.magnitude;
+    }
 }

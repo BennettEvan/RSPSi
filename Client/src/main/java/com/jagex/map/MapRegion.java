@@ -935,7 +935,7 @@ public final class MapRegion {
 			}
 		}
 
-		scene.shadeObjects(64, -50, -10, -50, 768);
+		scene.applyLighting(-50, -10, -50);
 		/*
 		 * for (int x = 0; x < width; x++) { for (int y = 0; y < length; y++) { if
 		 * ((tileFlags[1][x][y] & BRIDGE_TILE) != 0) { scene.method276(x, y); } } }

@@ -186,7 +186,6 @@ public final class Client implements Runnable {
 		SceneGraph.lowMemory = false;
 		lowMemory = false;
 		MapRegion.lowMemory = false;
-		ObjectDefinition.lowMemory = false;
 	}
 
 	public final static void unlinkCaches() {
@@ -566,7 +565,6 @@ public final class Client implements Runnable {
 			}
 
 			RenderableObject.client = this;
-			ObjectDefinition.client = this;
 			gameFinishedLoading();
 
 			GameRasterizer.getInstance().setBrightness(0.6);
@@ -1128,15 +1126,6 @@ public final class Client implements Runnable {
 		
 
 		int currentPlane = method120();
-	
-
-/*		int l = xCameraPos;
-		int i1 = zCameraPos;
-		int j1 = yCameraPos;
-		int k1 = yCameraCurve;
-		int l1 = xCameraCurve;*/
-
-			Mesh.aBoolean1684 = true;
 			Mesh.mouseX = mouseEventX;
 			Mesh.mouseY = mouseEventY;
 			gameImageBuffer.initializeRasterizer();

@@ -1,5 +1,6 @@
 package com.jagex.draw.raster;
 
+import com.jagex.draw.textures.Texture;
 import com.jagex.map.MapRegion;
 
 import com.jagex.cache.loader.textures.TextureLoader;
@@ -437,7 +438,7 @@ public class GameRasterizer extends GameRaster {
         }
     }
 
-	public void drawGouraudScanline(int[] dest, int offset, int x1, int x2, int c1, int c2) {
+	private void drawGouraudScanline(int[] dest, int offset, int x1, int x2, int c1, int c2) {
 		int length;
 		if (approximateAlphaBlending) {
 			int l1;
@@ -476,16 +477,21 @@ public class GameRasterizer extends GameRaster {
 				while (--length >= 0) {
 					int rgb = colourPalette[c1 >> 8];
 					c1 += l1;
-					dest[offset++] = rgb;
-					dest[offset++] = rgb;
-					dest[offset++] = rgb;
-					dest[offset++] = rgb;
+					dest[offset] = rgb;
+                    offset++;
+                    dest[offset] = rgb;
+                    offset++;
+                    dest[offset] = rgb;
+                    offset++;
+                    dest[offset] = rgb;
+                    offset++;
 				}
 				length = x2 - x1 & 3;
 				if (length > 0) {
 					int rgb = colourPalette[c1 >> 8];
 					do {
-						dest[offset++] = rgb;
+                        dest[offset] = rgb;
+                        offset++;
 					} while (--length > 0);
 					return;
 				}
@@ -496,17 +502,22 @@ public class GameRasterizer extends GameRaster {
 					int rgb = colourPalette[c1 >> 8];
 					c1 += l1;
 					rgb = ((rgb & 0xff00ff) * a2 >> 8 & 0xff00ff) + ((rgb & 0xff00) * a2 >> 8 & 0xff00);
-					dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
-					dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
-					dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
-					dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+					dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+                    offset++;
+                    dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+                    offset++;
+                    dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+                    offset++;
+                    dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+                    offset++;
 				}
 				length = x2 - x1 & 3;
 				if (length > 0) {
 					int rgb = colourPalette[c1 >> 8];
 					rgb = ((rgb & 0xff00ff) * a2 >> 8 & 0xff00ff) + ((rgb & 0xff00) * a2 >> 8 & 0xff00);
 					do {
-						dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+                        dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+                        offset++;
 					} while (--length > 0);
 				}
 			}
@@ -532,7 +543,8 @@ public class GameRasterizer extends GameRaster {
 		length = x2 - x1;
 		if (currentAlpha == 0) {
 			do {
-				dest[offset++] = colourPalette[c1 >> 8];
+				dest[offset] = colourPalette[c1 >> 8];
+                offset++;
 				c1 += i2;
 			} while (--length > 0);
 			return;
@@ -543,11 +555,12 @@ public class GameRasterizer extends GameRaster {
 			int rgb = colourPalette[c1 >> 8];
 			c1 += i2;
 			rgb = ((rgb & 0xff00ff) * a2 >> 8 & 0xff00ff) + ((rgb & 0xff00) * a2 >> 8 & 0xff00);
-			dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+			dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            offset++;
 		} while (--length > 0);
 	}
 
-    public void drawGouraudTriangle(int y1, int y2, int y3, int x1, int x2, int x3, int rgb) {
+    public void drawFlatTriangle(int y1, int y2, int y3, int x1, int x2, int x3, int rgb) {
         int l1 = 0;
         if (y2 != y1) {
             l1 = (x2 - x1 << 16) / (y2 - y1);
@@ -585,13 +598,13 @@ public class GameRasterizer extends GameRaster {
                     y3 -= y2;
                     y2 -= y1;
                     for (y1 = scanOffsets[y1]; --y2 >= 0; y1 += this.width) {
-                        drawGouraudScanline(this.raster, y1, rgb, x3 >> 16, x1 >> 16);
+                        drawFlatScanline(this.raster, y1, rgb, x3 >> 16, x1 >> 16);
                         x3 += j2;
                         x1 += l1;
                     }
 
                     while (--y3 >= 0) {
-                        drawGouraudScanline(this.raster, y1, rgb, x3 >> 16, x2 >> 16);
+                        drawFlatScanline(this.raster, y1, rgb, x3 >> 16, x2 >> 16);
                         x3 += j2;
                         x2 += i2;
                         y1 += this.width;
@@ -601,13 +614,13 @@ public class GameRasterizer extends GameRaster {
                 y3 -= y2;
                 y2 -= y1;
                 for (y1 = scanOffsets[y1]; --y2 >= 0; y1 += this.width) {
-                    drawGouraudScanline(this.raster, y1, rgb, x1 >> 16, x3 >> 16);
+                    drawFlatScanline(this.raster, y1, rgb, x1 >> 16, x3 >> 16);
                     x3 += j2;
                     x1 += l1;
                 }
 
                 while (--y3 >= 0) {
-                    drawGouraudScanline(this.raster, y1, rgb, x2 >> 16, x3 >> 16);
+                    drawFlatScanline(this.raster, y1, rgb, x2 >> 16, x3 >> 16);
                     x3 += j2;
                     x2 += i2;
                     y1 += this.width;
@@ -629,13 +642,13 @@ public class GameRasterizer extends GameRaster {
                 y2 -= y3;
                 y3 -= y1;
                 for (y1 = scanOffsets[y1]; --y3 >= 0; y1 += this.width) {
-                    drawGouraudScanline(this.raster, y1, rgb, x2 >> 16, x1 >> 16);
+                    drawFlatScanline(this.raster, y1, rgb, x2 >> 16, x1 >> 16);
                     x2 += j2;
                     x1 += l1;
                 }
 
                 while (--y2 >= 0) {
-                    drawGouraudScanline(this.raster, y1, rgb, x3 >> 16, x1 >> 16);
+                    drawFlatScanline(this.raster, y1, rgb, x3 >> 16, x1 >> 16);
                     x3 += i2;
                     x1 += l1;
                     y1 += this.width;
@@ -645,13 +658,13 @@ public class GameRasterizer extends GameRaster {
             y2 -= y3;
             y3 -= y1;
             for (y1 = scanOffsets[y1]; --y3 >= 0; y1 += this.width) {
-                drawGouraudScanline(this.raster, y1, rgb, x1 >> 16, x2 >> 16);
+                drawFlatScanline(this.raster, y1, rgb, x1 >> 16, x2 >> 16);
                 x2 += j2;
                 x1 += l1;
             }
 
             while (--y2 >= 0) {
-                drawGouraudScanline(this.raster, y1, rgb, x1 >> 16, x3 >> 16);
+                drawFlatScanline(this.raster, y1, rgb, x1 >> 16, x3 >> 16);
                 x3 += i2;
                 x1 += l1;
                 y1 += this.width;
@@ -683,13 +696,13 @@ public class GameRasterizer extends GameRaster {
                     y1 -= y3;
                     y3 -= y2;
                     for (y2 = scanOffsets[y2]; --y3 >= 0; y2 += this.width) {
-                        drawGouraudScanline(this.raster, y2, rgb, x1 >> 16, x2 >> 16);
+                        drawFlatScanline(this.raster, y2, rgb, x1 >> 16, x2 >> 16);
                         x1 += l1;
                         x2 += i2;
                     }
 
                     while (--y1 >= 0) {
-                        drawGouraudScanline(this.raster, y2, rgb, x1 >> 16, x3 >> 16);
+                        drawFlatScanline(this.raster, y2, rgb, x1 >> 16, x3 >> 16);
                         x1 += l1;
                         x3 += j2;
                         y2 += this.width;
@@ -699,13 +712,13 @@ public class GameRasterizer extends GameRaster {
                 y1 -= y3;
                 y3 -= y2;
                 for (y2 = scanOffsets[y2]; --y3 >= 0; y2 += this.width) {
-                    drawGouraudScanline(this.raster, y2, rgb, x2 >> 16, x1 >> 16);
+                    drawFlatScanline(this.raster, y2, rgb, x2 >> 16, x1 >> 16);
                     x1 += l1;
                     x2 += i2;
                 }
 
                 while (--y1 >= 0) {
-                    drawGouraudScanline(this.raster, y2, rgb, x3 >> 16, x1 >> 16);
+                    drawFlatScanline(this.raster, y2, rgb, x3 >> 16, x1 >> 16);
                     x1 += l1;
                     x3 += j2;
                     y2 += this.width;
@@ -727,13 +740,13 @@ public class GameRasterizer extends GameRaster {
                 y3 -= y1;
                 y1 -= y2;
                 for (y2 = scanOffsets[y2]; --y1 >= 0; y2 += this.width) {
-                    drawGouraudScanline(this.raster, y2, rgb, x3 >> 16, x2 >> 16);
+                    drawFlatScanline(this.raster, y2, rgb, x3 >> 16, x2 >> 16);
                     x3 += l1;
                     x2 += i2;
                 }
 
                 while (--y3 >= 0) {
-                    drawGouraudScanline(this.raster, y2, rgb, x1 >> 16, x2 >> 16);
+                    drawFlatScanline(this.raster, y2, rgb, x1 >> 16, x2 >> 16);
                     x1 += j2;
                     x2 += i2;
                     y2 += this.width;
@@ -743,13 +756,13 @@ public class GameRasterizer extends GameRaster {
             y3 -= y1;
             y1 -= y2;
             for (y2 = scanOffsets[y2]; --y1 >= 0; y2 += this.width) {
-                drawGouraudScanline(this.raster, y2, rgb, x2 >> 16, x3 >> 16);
+                drawFlatScanline(this.raster, y2, rgb, x2 >> 16, x3 >> 16);
                 x3 += l1;
                 x2 += i2;
             }
 
             while (--y3 >= 0) {
-                drawGouraudScanline(this.raster, y2, rgb, x2 >> 16, x1 >> 16);
+                drawFlatScanline(this.raster, y2, rgb, x2 >> 16, x1 >> 16);
                 x1 += j2;
                 x2 += i2;
                 y2 += this.width;
@@ -780,13 +793,13 @@ public class GameRasterizer extends GameRaster {
                 y2 -= y1;
                 y1 -= y3;
                 for (y3 = scanOffsets[y3]; --y1 >= 0; y3 += this.width) {
-                    drawGouraudScanline(this.raster, y3, rgb, x2 >> 16, x3 >> 16);
+                    drawFlatScanline(this.raster, y3, rgb, x2 >> 16, x3 >> 16);
                     x2 += i2;
                     x3 += j2;
                 }
 
                 while (--y2 >= 0) {
-                    drawGouraudScanline(this.raster, y3, rgb, x2 >> 16, x1 >> 16);
+                    drawFlatScanline(this.raster, y3, rgb, x2 >> 16, x1 >> 16);
                     x2 += i2;
                     x1 += l1;
                     y3 += this.width;
@@ -796,13 +809,13 @@ public class GameRasterizer extends GameRaster {
             y2 -= y1;
             y1 -= y3;
             for (y3 = scanOffsets[y3]; --y1 >= 0; y3 += this.width) {
-                drawGouraudScanline(this.raster, y3, rgb, x3 >> 16, x2 >> 16);
+                drawFlatScanline(this.raster, y3, rgb, x3 >> 16, x2 >> 16);
                 x2 += i2;
                 x3 += j2;
             }
 
             while (--y2 >= 0) {
-                drawGouraudScanline(this.raster, y3, rgb, x1 >> 16, x2 >> 16);
+                drawFlatScanline(this.raster, y3, rgb, x1 >> 16, x2 >> 16);
                 x2 += i2;
                 x1 += l1;
                 y3 += this.width;
@@ -824,13 +837,13 @@ public class GameRasterizer extends GameRaster {
             y1 -= y2;
             y2 -= y3;
             for (y3 = scanOffsets[y3]; --y2 >= 0; y3 += this.width) {
-                drawGouraudScanline(this.raster, y3, rgb, x1 >> 16, x3 >> 16);
+                drawFlatScanline(this.raster, y3, rgb, x1 >> 16, x3 >> 16);
                 x1 += i2;
                 x3 += j2;
             }
 
             while (--y1 >= 0) {
-                drawGouraudScanline(this.raster, y3, rgb, x2 >> 16, x3 >> 16);
+                drawFlatScanline(this.raster, y3, rgb, x2 >> 16, x3 >> 16);
                 x2 += l1;
                 x3 += j2;
                 y3 += this.width;
@@ -840,20 +853,20 @@ public class GameRasterizer extends GameRaster {
         y1 -= y2;
         y2 -= y3;
         for (y3 = scanOffsets[y3]; --y2 >= 0; y3 += this.width) {
-            drawGouraudScanline(this.raster, y3, rgb, x3 >> 16, x1 >> 16);
+            drawFlatScanline(this.raster, y3, rgb, x3 >> 16, x1 >> 16);
             x1 += i2;
             x3 += j2;
         }
 
         while (--y1 >= 0) {
-            drawGouraudScanline(this.raster, y3, rgb, x3 >> 16, x2 >> 16);
+            drawFlatScanline(this.raster, y3, rgb, x3 >> 16, x2 >> 16);
             x2 += l1;
             x3 += j2;
             y3 += this.width;
         }
     }
 
-    public void drawGouraudScanline(int[] dest, int offset, int rgb, int x1, int x2) {
+    private void drawFlatScanline(int[] dest, int offset, int rgb, int x1, int x2) {
         if (restrictEdges) {
             if (x2 > this.getMaxRight()) {
                 x2 = this.getMaxRight();
@@ -869,13 +882,18 @@ public class GameRasterizer extends GameRaster {
         int length = x2 - x1 >> 2;
         if (currentAlpha == 0) {
             while (--length >= 0) {
-                dest[offset++] = rgb;
-                dest[offset++] = rgb;
-                dest[offset++] = rgb;
-                dest[offset++] = rgb;
+                dest[offset] = rgb;
+                offset++;
+                dest[offset] = rgb;
+                offset++;
+                dest[offset] = rgb;
+                offset++;
+                dest[offset] = rgb;
+                offset++;
             }
             for (length = x2 - x1 & 3; --length >= 0; ) {
-                dest[offset++] = rgb;
+                dest[offset] = rgb;
+                offset++;
             }
             return;
         }
@@ -883,13 +901,18 @@ public class GameRasterizer extends GameRaster {
         int a2 = 256 - currentAlpha;
         rgb = ((rgb & 0xff00ff) * a2 >> 8 & 0xff00ff) + ((rgb & 0xff00) * a2 >> 8 & 0xff00);
         while (--length >= 0) {
-            dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
-            dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
-            dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
-            dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            offset++;
+            dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            offset++;
+            dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            offset++;
+            dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            offset++;
         }
         for (length = x2 - x1 & 3; --length >= 0; ) {
-            dest[offset++] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            dest[offset] = rgb + ((dest[offset] & 0xff00ff) * a1 >> 8 & 0xff00ff) + ((dest[offset] & 0xff00) * a1 >> 8 & 0xff00);
+            offset++;
         }
     }
 
@@ -897,7 +920,8 @@ public class GameRasterizer extends GameRaster {
                                            int tx3, int ty1, int ty2, int ty3, int tz1, int tz2, int tz3, int textureId) {
         int[] texturePixels = TextureLoader.getTexturePixels(textureId);
         if (texturePixels == null) {
-            int rgb = TextureLoader.getTexture(textureId).averageTextureColour();
+            Texture texture = TextureLoader.getTexture(textureId);
+            int rgb = texture == null ? 0 : texture.averageTextureColour();
             drawGouraudTriangle(y1, y2, y3, x1, x2, x3, method965(rgb, c1), method965(rgb, c2), method965(rgb, c3));
         } else {
             currentTextureTransparent = !TextureLoader.getTextureTransparent(textureId);

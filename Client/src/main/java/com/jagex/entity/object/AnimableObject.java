@@ -1,6 +1,5 @@
 package com.jagex.entity.object;
 
-import com.jagex.cache.anim.Frame;
 import com.jagex.cache.anim.Graphic;
 import com.jagex.cache.loader.anim.FrameLoader;
 import com.jagex.cache.loader.anim.GraphicLoader;
@@ -117,7 +116,7 @@ public final class AnimableObject extends Renderable {
 			model.rotateClockwise();
 		}
 
-		model.light(64 + graphic.getModelBrightness(), 850 + graphic.getModelShadow(), -30, -50, -30, true);
+		model.light(64 + graphic.getModelBrightness(), 850 + graphic.getModelShadow(), -30, -50, -30);
 		return model;
 	}
 

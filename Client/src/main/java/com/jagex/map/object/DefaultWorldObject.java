@@ -110,22 +110,6 @@ public abstract class DefaultWorldObject implements WorldObject {
 	public void setPrimary(Renderable renderable) {
 		this.primary = renderable;
 	}
-	
-	public boolean primaryExists() {
-		return primary != null;
-	}
-	
-	public boolean secondaryExists() {
-		return secondary != null;
-	}
-	
-	public boolean primaryHasNormals() {
-		return primaryExists() && primary.hasNormals();
-	}
-	
-	public boolean secondaryHasNormals() {
-		return secondaryExists() && secondary.hasNormals();
-	}
 
 	public void setRenderHeight(int z) {
 		renderHeight = z;

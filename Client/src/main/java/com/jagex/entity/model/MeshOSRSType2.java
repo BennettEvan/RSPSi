@@ -65,33 +65,33 @@ public class MeshOSRSType2 extends Mesh {
         var47 += var19;
         int var10000 = var47 + var20;
 
-        vertexCount = var9;
-        triangleCount = var10;
-        numTextureFaces = var11;
+        verticesCount = var9;
+        triangleFaceCount = var10;
+        texturesCount = var11;
 
-        vertexX = new int[var9];
-        vertexY = new int[var9];
-        vertexZ = new int[var9];
-        faceIndices1 = new int[var10];
-        faceIndices2 = new int[var10];
-        faceIndices3 = new int[var10];
+        verticesX = new int[var9];
+        verticesY = new int[var9];
+        verticesZ = new int[var9];
+        trianglePointsX = new int[var10];
+        trianglePointsY = new int[var10];
+        trianglePointsZ = new int[var10];
 
 
         if (var11 > 0) {
-            textureMap = new byte[var11];
-            texIndices1 = new int[var11];
-            texIndices2 = new int[var11];
-            texIndices3 = new int[var11];
+            textureRenderTypes = new byte[var11];
+            texTriangleX = new int[var11];
+            texTriangleY = new int[var11];
+            texTriangleZ = new int[var11];
         }
 
 
         if (var16 == 1)
-            packedVertexGroups = new int[var9];
+            vertexSkins = new int[var9];
 
         if (var12 == 1) {
-            this.triangleInfo = new int[var10];
-            this.faceTexture = new byte[var10];
-            this.faceMaterial = new int[var10];
+            this.faceRenderType = new int[var10];
+            this.textureCoords = new byte[var10];
+            this.faceTextures = new short[var10];
         }
 
         if (var13 == 255)
@@ -104,10 +104,10 @@ public class MeshOSRSType2 extends Mesh {
             faceTransparencies = new int[var10];
 
         if (var15 == 1)
-            packedTransparencyVertexGroups = new int[var10];
+            triangleSkinValues = new int[var10];
 
         if (var17 == 1) {
-            for (int var51 = 0; var51 < vertexCount; ++var51) {
+            for (int var51 = 0; var51 < verticesCount; ++var51) {
                 int subgroups = var6.readUByte();
                 animayaGroups[var51] = new int[subgroups];
                 animayaScales[var51] = new int[subgroups];
@@ -118,7 +118,7 @@ public class MeshOSRSType2 extends Mesh {
                 }
             }
         }
-        triangleColors = new int[var10];
+        faceColors = new int[var10];
 
         var4.setPosition(var23);
         var5.setPosition(var34);
@@ -152,14 +152,14 @@ public class MeshOSRSType2 extends Mesh {
                 var44 = var7.readSmart();
             }
 
-            this.vertexX[var40] = var37 + var42;
-            this.vertexY[var40] = var38 + var43;
-            this.vertexZ[var40] = var39 + var44;
-            var37 = this.vertexX[var40];
-            var38 = this.vertexY[var40];
-            var39 = this.vertexZ[var40];
+            this.verticesX[var40] = var37 + var42;
+            this.verticesY[var40] = var38 + var43;
+            this.verticesZ[var40] = var39 + var44;
+            var37 = this.verticesX[var40];
+            var38 = this.verticesY[var40];
+            var39 = this.verticesZ[var40];
             if (var16 == 1) {
-                this.packedVertexGroups[var40] = var8.readUByte();
+                this.vertexSkins[var40] = var8.readUByte();
             }
         }
         if (var17 == 1) {
@@ -180,25 +180,25 @@ public class MeshOSRSType2 extends Mesh {
 
 
         for (var40 = 0; var40 < var10; var40++) {
-            triangleColors[var40] = var4.readUShort();
+            faceColors[var40] = var4.readUShort();
             if (var12 == 1) {
                 var41 = var5.readUByte();
                 if ((var41 & 1) == 1) {
-                    this.triangleInfo[var40] = 1;
+                    this.faceRenderType[var40] = 1;
                 } else {
-                    this.triangleInfo[var40] = 0;
+                    this.faceRenderType[var40] = 0;
                 }
 
                 if ((var41 & 2) == 2) {
-                    this.faceTexture[var40] = (byte) (var41 >> 2);
-                    this.faceMaterial[var40] = this.triangleColors[var40];
-                    this.triangleColors[var40] = 127;
-                    if (this.faceMaterial[var40] != -1) {
+                    this.textureCoords[var40] = (byte) (var41 >> 2);
+                    this.faceTextures[var40] = (short) this.faceColors[var40];
+                    this.faceColors[var40] = 127;
+                    if (this.faceTextures[var40] != -1) {
                         var3 = true;
                     }
                 } else {
-                    this.faceTexture[var40] = (byte) -1;
-                    this.faceMaterial[var40] = -1;
+                    this.textureCoords[var40] = (byte) -1;
+                    this.faceTextures[var40] = -1;
                 }
             }
             if (var13 == 255) {
@@ -211,7 +211,7 @@ public class MeshOSRSType2 extends Mesh {
                 }
             }
             if (var15 == 1)
-                packedTransparencyVertexGroups[var40] = var8.readUByte();
+                triangleSkinValues[var40] = var8.readUByte();
 
         }
 
@@ -233,27 +233,27 @@ public class MeshOSRSType2 extends Mesh {
                 var41 = var4.readSmart() + var40;
                 var42 = var4.readSmart() + var41;
                 var43 = var42;
-                this.faceIndices1[var44] = var40;
-                this.faceIndices2[var44] = var41;
-                this.faceIndices3[var44] = var42;
+                this.trianglePointsX[var44] = var40;
+                this.trianglePointsY[var44] = var41;
+                this.trianglePointsZ[var44] = var42;
             }
 
             if (var45 == 2) {
                 var41 = var42;
                 var42 = var4.readSmart() + var43;
                 var43 = var42;
-                this.faceIndices1[var44] = var40;
-                this.faceIndices2[var44] = var41;
-                this.faceIndices3[var44] = var42;
+                this.trianglePointsX[var44] = var40;
+                this.trianglePointsY[var44] = var41;
+                this.trianglePointsZ[var44] = var42;
             }
 
             if (var45 == 3) {
                 var40 = var42;
                 var42 = var4.readSmart() + var43;
                 var43 = var42;
-                this.faceIndices1[var44] = var40;
-                this.faceIndices2[var44] = var41;
-                this.faceIndices3[var44] = var42;
+                this.trianglePointsX[var44] = var40;
+                this.trianglePointsY[var44] = var41;
+                this.trianglePointsZ[var44] = var42;
             }
 
             if (var45 == 4) {
@@ -262,29 +262,29 @@ public class MeshOSRSType2 extends Mesh {
                 var41 = var46;
                 var42 = var4.readSmart() + var43;
                 var43 = var42;
-                this.faceIndices1[var44] = var40;
-                this.faceIndices2[var44] = var46;
-                this.faceIndices3[var44] = var42;
+                this.trianglePointsX[var44] = var40;
+                this.trianglePointsY[var44] = var46;
+                this.trianglePointsZ[var44] = var42;
             }
         }
 
         var4.setPosition(var33);
 
         for (var44 = 0; var44 < var11; ++var44) {
-            this.textureMap[var44] = 0;
-            this.texIndices1[var44] = (short) var4.readUShort();
-            this.texIndices2[var44] = (short) var4.readUShort();
-            this.texIndices3[var44] = (short) var4.readUShort();
+            this.textureRenderTypes[var44] = 0;
+            this.texTriangleX[var44] = (short) var4.readUShort();
+            this.texTriangleY[var44] = (short) var4.readUShort();
+            this.texTriangleZ[var44] = (short) var4.readUShort();
         }
 
-        if (this.faceTexture != null) {
+        if (this.textureCoords != null) {
             boolean var48 = false;
 
             for (var45 = 0; var45 < var10; ++var45) {
-                var46 = this.faceTexture[var45] & 255;
+                var46 = this.textureCoords[var45] & 255;
                 if (var46 != 255) {
-                    if (this.faceIndices1[var45] == (this.texIndices1[var46] & '\uffff') && this.faceIndices2[var45] == (this.texIndices2[var46] & '\uffff') && this.faceIndices3[var45] == (this.texIndices3[var46] & '\uffff')) {
-                        this.faceTexture[var45] = -1;
+                    if (this.trianglePointsX[var45] == (this.texTriangleX[var46] & '\uffff') && this.trianglePointsY[var45] == (this.texTriangleY[var46] & '\uffff') && this.trianglePointsZ[var45] == (this.texTriangleZ[var46] & '\uffff')) {
+                        this.textureCoords[var45] = -1;
                     } else {
                         var48 = true;
                     }
@@ -292,16 +292,16 @@ public class MeshOSRSType2 extends Mesh {
             }
 
             if (!var48) {
-                this.faceTexture = null;
+                this.textureCoords = null;
             }
         }
 
         if (!var3) {
-            this.faceMaterial = null;
+            this.faceTextures = null;
         }
 
         if (!var2) {
-            this.triangleInfo = null;
+            this.faceRenderType = null;
         }
     }
 }
