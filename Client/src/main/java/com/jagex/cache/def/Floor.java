@@ -2,7 +2,7 @@ package com.jagex.cache.def;
 
 public class Floor {
 
-	private final static int hsl24to16(int h, int s, int l) {
+	public static int hsl24To16(int h, int s, int l) {
 		if (l > 179) {
 			s /= 2;
 		}
@@ -163,7 +163,7 @@ public class Floor {
 			chroma = 1;
 		}
 		weightedHue = (int) (h * chroma);
-		colour = hsl24to16(hue, saturation, luminance);
+		colour = hsl24To16(hue, saturation, luminance);
 	}
 
 	public void setTexture(int texture) {

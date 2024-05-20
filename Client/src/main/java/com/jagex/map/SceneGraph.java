@@ -4552,17 +4552,16 @@ public class SceneGraph {
 	 * Sets the collision plane of a tile (i.e. the plane that it derives its
 	 * collision data from).
 	 *
-	 * @param x              The x coordinate of the tile.
-	 * @param y              The y coordinate of the tile.
-	 * @param plane          The plane of the tile.
-	 * @param collisionPlane The collision plane of the tile.
+	 * @param x     The x coordinate of the tile.
+	 * @param y     The y coordinate of the tile.
+	 * @param plane The plane of the tile.
 	 */
-	public void setCollisionPlane(int x, int y, int plane, int collisionPlane) {
+	public void setCollisionPlane(int x, int y, int plane) {
 		SceneTile tile = tiles[plane][x][y];
 		if (tile == null)
 			return;
 
-		tiles[plane][x][y].collisionPlane = collisionPlane;
+		tiles[plane][x][y].collisionPlane = plane;
 	}
 
 	public void applyLighting(int i, int k, int i1) {
