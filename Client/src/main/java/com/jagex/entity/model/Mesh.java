@@ -1317,7 +1317,7 @@ public class Mesh extends Renderable {
         int l2 = boundingPlaneRadius * yCosine >> 16;
         int i3 = k2 + l2;
 
-        if (i3 <= 50 || k2 >= 6500)
+        if (i3 <= 50 || k2 >= (Options.renderDistance.get() * 140))
             return;
 
         int j3 = y * xSine + x * xCosine >> 16;

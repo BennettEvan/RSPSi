@@ -2646,7 +2646,7 @@ public class SceneGraph {
 		int i1 = j * xCosine - k * xSine >> 16;
 		int j1 = i * ySine + i1 * yCosine >> 16;
 		int k1 = i * yCosine - i1 * ySine >> 16;
-		if (j1 < 50 || j1 > 3500)
+		if (j1 < 50 || j1 > (Options.renderDistance.get() * 140))
 			return false;
 		int l1 = anInt493 + (l << 9) / j1;
 		int i2 = anInt494 + (k1 << 9) / j1;
