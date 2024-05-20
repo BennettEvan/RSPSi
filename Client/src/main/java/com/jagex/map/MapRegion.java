@@ -547,44 +547,13 @@ public final class MapRegion {
     public ObjectKey spawnObjectToWorld(SceneGraph scene, int id, int x, int y, int z, int type, int orientation, boolean temporary) {
         maximumPlane = Math.min(z, maximumPlane);
 
-        ObjectDefinition definition = ObjectDefinitionLoader.lookup(id);
-
-        int sizeX;
-        int sizeY;
-        if (orientation != 1 && orientation != 3) {
-            sizeX = definition.getWidth();
-            sizeY = definition.getLength();
-        } else {
-            sizeX = definition.getLength();
-            sizeY = definition.getWidth();
-        }
-
-        int modX;
-        int modX1;
-        if (sizeX + x <= 104) {
-            modX = (sizeX >> 1) + x;
-            modX1 = (sizeX + 1 >> 1) + x;
-        } else {
-            modX = x;
-            modX1 = x + 1;
-        }
-
-        int modY;
-        int modY1;
-        if (sizeY + y <= 104) {
-            modY = (sizeY >> 1) + y;
-            modY1 = y + (sizeY + 1 >> 1);
-        } else {
-            modY = y;
-            modY1 = y + 1;
-        }
-
-        int centre = tileHeights[z][modX1][modY1];
-        int east = tileHeights[z][modX][modY1];
-        int northEast = tileHeights[z][modX][modY];
-        int north = tileHeights[z][modX1][modY];
+        int centre = tileHeights[z][x][y];
+        int east = tileHeights[z][x + 1][y];
+        int northEast = tileHeights[z][x + 1][y + 1];
+        int north = tileHeights[z][x][y + 1];
         int mean = centre + east + northEast + north >> 2;
 
+        ObjectDefinition definition = ObjectDefinitionLoader.lookup(id);
         ObjectKey objectKey = new ObjectKey(x, y, id, type, orientation, definition.isSolid(), definition.isInteractive());
         if (type == 22) {
             Renderable object;
