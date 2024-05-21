@@ -212,7 +212,6 @@ public class MainWindow extends Application {
 			BaseSwatch data = new OverlaySwatch(g, label, idx);
 			overlaySwatch.addSwatch(data);
 		}
-
 	}
 
 	@Override
@@ -227,7 +226,7 @@ public class MainWindow extends Application {
 			Parent content = loader.load();
 			double windowWidth = (Double) Settings.properties.getOrDefault("window_width",1240.0);
 			double windowHeight = (Double) Settings.properties.getOrDefault("window_height",800.0);
-			scene = new Scene(content,windowWidth,windowHeight);
+			scene = new Scene(content, windowWidth, windowHeight);
 
 			scene.setFill(Color.TRANSPARENT);
 
@@ -237,7 +236,7 @@ public class MainWindow extends Application {
 			primaryStage.getIcons().addAll(ResourceLoader.getSingleton().getIcons());
 
 			ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) -> {
-				if((boolean) Settings.properties.getOrDefault("remember_size",true) == true) {
+				if((boolean) Settings.properties.getOrDefault("remember_size", true)) {
 					Settings.properties.put("window_width", primaryStage.getWidth());
 					Settings.properties.put("window_height", primaryStage.getHeight());
 					Settings.saveSettings();
@@ -245,7 +244,7 @@ public class MainWindow extends Application {
 			};
 
 			ChangeListener<Number> stageLocationListener = (observable, oldValue, newValue) -> {
-				if((boolean) Settings.properties.getOrDefault("remember_location",false) == true) {
+				if((boolean) Settings.properties.getOrDefault("remember_location", false)) {
 					Settings.properties.put("windowLocationWidth", primaryStage.getX());
 					Settings.properties.put("windowLocationHeight", primaryStage.getY());
 					Settings.saveSettings();

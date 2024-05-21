@@ -1,6 +1,5 @@
 package com.jagex.map.tile;
 
-import com.rspsi.options.Options;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,7 +11,6 @@ public final class ShapedTile {
 
 	public static int[] screenX = new int[6];
 	public static int[] screenY = new int[6];
-	public static int[] screenZ = new int[6];
 	public static int[] viewSpaceX = new int[6];
 	public static int[] viewSpaceY = new int[6];
 	public static int[] viewSpaceZ = new int[6];
@@ -51,16 +49,6 @@ public final class ShapedTile {
 	boolean flat;
 	public int orientation;
 	public boolean textured;
-
-	private int textureId = -1;
-	public int color61;
-	public int color71;
-	public int color81;
-	public int color91;
-	public int color62;
-	public int color72;
-	public int color82;
-	public int color92;
 
 	public ShapedTile(int type, int orientation) {
 		flat = true;
@@ -189,21 +177,12 @@ public final class ShapedTile {
 			   int underlay_color, boolean tex) {
 
 		textured = tex;
-		color61 = centerUnderColour;
-		color71 = eastUnderColour;
-		color81 = neUnderColour;
-		color91 = centerOverColour;
-		color62 = northUnderColour;
-		color72 = eastOverColour;
-		color82 = neOverColour;
-		color92 = northOverColour;
         flat = centreZ == eastZ && centreZ == northEastZ && centreZ == northZ;
 
 		tileType = type;
 		this.orientation = orientation;
 		this.underlayColour = underlayColour;
 		this.textureColour = textureColour;
-		textureId = overlay_texture;
 
 		int j5 = 32;
 		int i5 = 64;
@@ -441,10 +420,6 @@ public final class ShapedTile {
 
 	public int getTextureColour() {
 		return textureColour;
-	}
-
-	public int getTextureId() {
-		return textureId;
 	}
 
 	public int getTileType() {

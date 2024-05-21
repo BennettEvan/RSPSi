@@ -48,30 +48,25 @@ public class Options {
 	public static IntegerProperty brushSize = new SimpleIntegerProperty(1);
 	public static IntegerProperty objectSelectionType = new SimpleIntegerProperty(0);
 	
-	public static ObjectProperty<BitFlag> tileFlags = new SimpleObjectProperty<BitFlag>(new BitFlag());
+	public static ObjectProperty<BitFlag> tileFlags = new SimpleObjectProperty<>(new BitFlag());
 	
 	public static IntegerProperty rotation = new SimpleIntegerProperty(0);
 
-	public static ObjectProperty<ToolType> currentTool = new SimpleObjectProperty<ToolType>(ToolType.SELECT_TILE);
+	public static ObjectProperty<ToolType> currentTool = new SimpleObjectProperty<>(ToolType.SELECT_TILE);
 
-	public static ObjectProperty<ObjectDataset> currentObject = new SimpleObjectProperty<ObjectDataset>();
+	public static ObjectProperty<ObjectDataset> currentObject = new SimpleObjectProperty<>();
 
 	public static IntegerProperty overlayPaintId = new SimpleIntegerProperty(0);
 	public static IntegerProperty overlayPaintShapeId = new SimpleIntegerProperty(1);
 	public static IntegerProperty underlayPaintId = new SimpleIntegerProperty(0);
-	public static ObjectProperty<BrushType> brushType = new SimpleObjectProperty<BrushType>(BrushType.RECTANGLE);
+	public static ObjectProperty<BrushType> brushType = new SimpleObjectProperty<>(BrushType.RECTANGLE);
 
 	public static List<SceneTileData> importData = Lists.newArrayList();
-
-	public static BooleanProperty hdMap = new SimpleBooleanProperty(false);
 	
 	public static BooleanProperty loadAnimations = new SimpleBooleanProperty(false);
-
-	public static BooleanProperty unsavedChanges = new SimpleBooleanProperty(false);
 	
 	public static IntegerProperty renderDistance = new SimpleIntegerProperty(30);
 	public static IntegerProperty mapRegionSize = new SimpleIntegerProperty(256);
-	
 
 	public static BooleanProperty showCamera = new SimpleBooleanProperty(false);
 	public static BooleanProperty showBorders = new SimpleBooleanProperty(false);
@@ -79,5 +74,4 @@ public class Options {
 
 	public static BooleanProperty rememberEditorSize = new SimpleBooleanProperty(true);
 	public static BooleanProperty rememberEditorLocation = new SimpleBooleanProperty(false);
-
 }
