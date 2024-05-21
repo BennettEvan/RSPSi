@@ -10,7 +10,7 @@ import com.jagex.cache.def.RSArea;
 import com.jagex.cache.graphics.Sprite;
 import com.jagex.cache.loader.config.RSAreaLoader;
 import com.jagex.cache.loader.object.ObjectDefinitionLoader;
-import com.jagex.draw.ImageGraphicsBuffer;
+import com.jagex.draw.MainBufferProvider;
 import com.jagex.draw.raster.GameRasterizer;
 import com.jagex.entity.model.Mesh;
 import com.jagex.entity.model.MeshLoader;
@@ -52,7 +52,7 @@ public class ObjectModelView extends VBox {
 	private ObjectDataset currentSelection;
 	private Slider slider;
 
-	private ImageGraphicsBuffer buffer;
+	private MainBufferProvider buffer;
 
 	public ObjectModelView() {
 		modelCanvas = new DisplayCanvas(300, 300);
@@ -62,7 +62,7 @@ public class ObjectModelView extends VBox {
 		modelRaster.setBrightness(0.6);
 		modelRaster.setTextureBrightness(0.6);
 		
-		buffer = new ImageGraphicsBuffer(300, 300, modelRaster);
+		buffer = new MainBufferProvider(modelRaster, 300, 300);
 		buffer.initializeRasterizer();
 		modelRaster.useViewport();
 		
@@ -205,7 +205,7 @@ public class ObjectModelView extends VBox {
 			sprite.drawSprite(modelRaster, xPos, yPos, zoom);
 			buffer.finalize();
 
-			modelCanvas.drawImage(buffer.getFXImage(), 0, 0);
+			modelCanvas.drawImage(buffer.getFinalImage(), 0, 0);
 			return;
 		}
 		if (model == null) {
@@ -219,7 +219,7 @@ public class ObjectModelView extends VBox {
 		model.render(modelRaster, roll, yaw, pitch, 0, 0, 0, zoom, 0);
 		buffer.finalize();
 
-		modelCanvas.drawImage(buffer.getFXImage(), 0, 0);
+		modelCanvas.drawImage(buffer.getFinalImage(), 0, 0);
 	}
 
 	private void resizeViews() {
@@ -228,7 +228,7 @@ public class ObjectModelView extends VBox {
 		pane.setPrefHeight(this.getHeight());
 		pane.setPrefWidth(this.getWidth());
 		modelCanvas.resize(this.getWidth(), this.getHeight());
-		buffer = new ImageGraphicsBuffer((int) this.getWidth(), (int) this.getHeight(), modelRaster);
+		buffer = new MainBufferProvider(modelRaster, (int) this.getWidth(), (int) this.getHeight());
 		buffer.initializeRasterizer();
 		modelRaster.useViewport();
 	}

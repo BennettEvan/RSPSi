@@ -11,7 +11,7 @@ import com.jagex.cache.loader.map.MapIndexLoader;
 import com.jagex.cache.loader.map.MapType;
 import com.jagex.cache.loader.object.ObjectDefinitionLoader;
 import com.jagex.chunk.Chunk;
-import com.jagex.draw.ImageGraphicsBuffer;
+import com.jagex.draw.MainBufferProvider;
 import com.jagex.draw.font.RSFont;
 import com.jagex.draw.raster.GameRasterizer;
 import com.jagex.entity.model.Mesh;
@@ -101,7 +101,7 @@ public final class Client implements Runnable {
     public SceneGraph sceneGraph;
     public boolean cameraMoved = true;
     public int[] settings = new int[10000];
-    public ImageGraphicsBuffer gameImageBuffer;
+    public MainBufferProvider gameImageBuffer;
     public int cameraRotationX;
     public int cameraRotationZ;
     public int xCameraPos = 32 * 128;
@@ -330,7 +330,7 @@ public final class Client implements Runnable {
         resizeWidth = w;
         gameCanvas.resize(w, h);
 
-        gameImageBuffer = new ImageGraphicsBuffer(w, h, GameRasterizer.getInstance());
+        gameImageBuffer = new MainBufferProvider(GameRasterizer.getInstance(), w, h);
         int[] ai = new int[64];
         for (int i8 = 0; i8 < 64; i8++) {
             int theta = i8 * 32 + 15;
@@ -372,7 +372,7 @@ public final class Client implements Runnable {
         ClientPluginLoader.loadPlugins();
         try {
             if (cache.getIndexedFileSystem().is317()) {
-                Archive graphics = cache.createArchive(4, "2d graphics");
+                Archive graphics = cache.createArchive(4);
                 Sprite[] scenes = new Sprite[1000];
                 Sprite[] functions = new Sprite[1000];
                 int lastIdx = 0;
@@ -407,7 +407,7 @@ public final class Client implements Runnable {
                 try {
                     int lastIdx = 0;
 
-                    Archive graphics = cache.createArchive(4, "2d graphics");
+                    Archive graphics = cache.createArchive(4);
                     Sprite[] functions = new Sprite[1000];
                     try {
                         for (int function = 0; function < functions.length; function++) {
@@ -897,7 +897,7 @@ public final class Client implements Runnable {
 
     public void drawGameImage() {
         gameImageBuffer.finalize();
-        WritableImage finalImg = gameImageBuffer.finalImage;
+        WritableImage finalImg = gameImageBuffer.getFinalImage();
         Platform.runLater(() -> drawImage(finalImg));
     }
 
@@ -917,7 +917,7 @@ public final class Client implements Runnable {
     public void drawMinimapImage() {
         final Chunk chunk = this.getCurrentChunk();
         chunk.minimapImageBuffer.finalize();
-        Platform.runLater(() -> mapCanvas.drawImage(chunk.minimapImageBuffer.getFXImage(), 0, 0));
+        Platform.runLater(() -> mapCanvas.drawImage(chunk.minimapImageBuffer.getFinalImage(), 0, 0));
     }
 
     public void drawMinimapFullImage() {
@@ -937,7 +937,7 @@ public final class Client implements Runnable {
                     int mapScale = Options.mapRegionSize.get() / 64;
                     int xPos = chunk.offsetX * mapScale;
                     int yPos = (int) (fullMapCanvas.getHeight() - Options.mapRegionSize.get() - (chunk.offsetY * mapScale));
-                    fullMapCanvas.drawImage(chunk.minimapImageBuffer.getFXImage(), xPos, yPos);
+                    fullMapCanvas.drawImage(chunk.minimapImageBuffer.getFinalImage(), xPos, yPos);
                     if (Options.showBorders.get()) {
                         fullMapCanvas.getGraphicsContext2D().setStroke(Color.RED);
                         fullMapCanvas.getGraphicsContext2D().strokeRect(xPos, yPos, Options.mapRegionSize.get(), Options.mapRegionSize.get());
@@ -1026,7 +1026,7 @@ public final class Client implements Runnable {
         if (gameImageBuffer != null) {
             return;
         }
-        gameImageBuffer = new ImageGraphicsBuffer((int) gameCanvas.getWidth(), (int) gameCanvas.getHeight(), GameRasterizer.getInstance());
+        gameImageBuffer = new MainBufferProvider(GameRasterizer.getInstance(), (int) gameCanvas.getWidth(), (int) gameCanvas.getHeight());
         gameScreenReinitialized = true;
     }
 

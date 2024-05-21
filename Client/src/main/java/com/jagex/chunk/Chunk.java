@@ -7,7 +7,7 @@ import com.jagex.cache.def.RSArea;
 import com.jagex.cache.graphics.Sprite;
 import com.jagex.cache.loader.config.RSAreaLoader;
 import com.jagex.cache.loader.object.ObjectDefinitionLoader;
-import com.jagex.draw.ImageGraphicsBuffer;
+import com.jagex.draw.MainBufferProvider;
 import com.jagex.draw.raster.GameRasterizer;
 import com.jagex.entity.object.AnimableObject;
 import com.jagex.map.MapRegion;
@@ -48,7 +48,7 @@ public class Chunk {
 
     public byte[] objectMapData;
     public int offsetX, offsetY;
-    public ImageGraphicsBuffer minimapImageBuffer = new ImageGraphicsBuffer(256, 256, rasterizer);
+    public MainBufferProvider minimapImageBuffer = new MainBufferProvider(rasterizer, 256, 256);
     public int regionX, regionY;
     public MapRegion mapRegion;
     public boolean updated = true;

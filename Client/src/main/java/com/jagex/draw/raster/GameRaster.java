@@ -18,7 +18,7 @@ public class GameRaster {
 	protected int clipRight;
 	protected int clipTop;
 
-    public void init(int height, int width, int[] pixels) {
+    public void init(int[] pixels, int width, int height) {
 		this.raster = pixels;
 		this.width = width;
 		this.height = height;
@@ -51,7 +51,7 @@ public class GameRaster {
 		this.clipRight = clipRight;
 		this.clipTop = clipTop;
 
-		maxRight = this.clipRight - 1;
+		maxRight = this.clipRight;
 		centreX = this.clipRight / 2;
 		centreY = this.clipTop / 2;
 	}

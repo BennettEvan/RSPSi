@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import com.google.common.io.Resources;
 import com.jagex.Client;
-import com.jagex.draw.ImageGraphicsBuffer;
+import com.jagex.draw.MainBufferProvider;
 import com.jagex.draw.raster.GameRasterizer;
 import com.jagex.entity.model.Mesh;
 import com.jagex.entity.model.MeshLoader;
@@ -35,7 +35,7 @@ public class GenericModelView extends VBox {
 	private int zoom = 600;
 	private Slider slider;
 
-	private ImageGraphicsBuffer buffer;
+	private MainBufferProvider buffer;
 	
 	public int getZoom() {
 		return zoom;
@@ -53,7 +53,7 @@ public class GenericModelView extends VBox {
 		modelRaster.setBrightness(0.6);
 		modelRaster.setTextureBrightness(0.6);
 		
-		buffer = new ImageGraphicsBuffer(300, 300, modelRaster);
+		buffer = new MainBufferProvider(modelRaster, 300, 300);
 		buffer.initializeRasterizer();
 		modelRaster.useViewport();
 		
@@ -185,7 +185,7 @@ public class GenericModelView extends VBox {
 
 		buffer.finalize();
 
-		modelCanvas.drawImage(buffer.getFXImage(), 0, 0);
+		modelCanvas.drawImage(buffer.getFinalImage(), 0, 0);
 	}
 
 	private void resizeViews() {
@@ -194,7 +194,7 @@ public class GenericModelView extends VBox {
 		pane.setPrefHeight(this.getHeight());
 		pane.setPrefWidth(this.getWidth());
 		modelCanvas.resize(this.getWidth(), this.getHeight());
-		buffer = new ImageGraphicsBuffer((int) this.getWidth(), (int) this.getHeight(), modelRaster);
+		buffer = new MainBufferProvider(modelRaster, (int) this.getWidth(), (int) this.getHeight());
 		buffer.initializeRasterizer();
 		modelRaster.useViewport();
 	}

@@ -488,7 +488,7 @@ public final class Sprite extends GameRaster {
     }
 
     public void initRaster(GameRasterizer rasterizer) {
-        rasterizer.init(height, width, raster);
+        rasterizer.init(raster, width, height);
     }
 
     public void resize() {

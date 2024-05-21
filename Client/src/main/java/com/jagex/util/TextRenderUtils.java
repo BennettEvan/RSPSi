@@ -1,6 +1,6 @@
 package com.jagex.util;
 
-import com.jagex.draw.ImageGraphicsBuffer;
+import com.jagex.draw.MainBufferProvider;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -18,7 +18,7 @@ public class TextRenderUtils {
 		g.setColor(oldColor);
 	}
 	
-	public static int renderLeft(ImageGraphicsBuffer graphicsBuffer, String text, double x, double y, int colour) {
+	public static int renderLeft(MainBufferProvider graphicsBuffer, String text, double x, double y, int colour) {
 		if (text == null || text.isEmpty()) {
 			return 0;
 		}

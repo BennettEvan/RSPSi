@@ -12,7 +12,7 @@ import com.jagex.io.Buffer;
 
 public class FrameBaseLoaderOSRS extends FrameBaseLoader {
 	
-	private Map<Integer, FrameBase> skeletons = Maps.newConcurrentMap();
+	private final Map<Integer, FrameBase> skeletons = Maps.newConcurrentMap();
 	
 	@Override
 	public FrameBase get(int id) {
@@ -45,12 +45,11 @@ public class FrameBaseLoaderOSRS extends FrameBaseLoader {
 	}
 
 	public void init(Index skeletonIndex) {
-		for(Archive archive : skeletonIndex.archives()) {
-			if(archive != null && archive.containsData()) {
+		for (Archive archive : skeletonIndex.archives()) {
+			if (archive != null && archive.containsData()) {
 				FrameBase base = decode(new Buffer(archive.file(0).getData()));
 				skeletons.put(archive.getId(), base);
 			}
 		}
 	}
-
 }

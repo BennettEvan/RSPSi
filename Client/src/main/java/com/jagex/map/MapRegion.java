@@ -544,7 +544,7 @@ public final class MapRegion {
         }
     }
 
-    public ObjectKey spawnObjectToWorld(SceneGraph scene, int id, int x, int y, int z, int type, int orientation, boolean temporary) {
+    public void spawnObjectToWorld(SceneGraph scene, int id, int x, int y, int z, int type, int orientation, boolean temporary) {
         maximumPlane = Math.min(z, maximumPlane);
 
         int centre = tileHeights[z][x][y];
@@ -813,7 +813,6 @@ public final class MapRegion {
                 scene.addWallDecoration(objectKey, y, orientation, z, 0, mean, object, x, 0, 768, temporary);
             }
         }
-        return objectKey;
     }
 
     public void updateTiles() {
