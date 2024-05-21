@@ -37,8 +37,8 @@ public class MapTile {
 
 		@Subscribe(threadMode = ThreadMode.ASYNC)
 		public void onResourceResponse(ResourceResponse response) {
-			if(response.getRequest().getType() == CacheFileType.MAP) {
-				int fileId = response.getRequest().getFile();
+			if(response.request().getType() == CacheFileType.MAP) {
+				int fileId = response.request().getFile();
 				if(fileId == landscapeId) {
 					System.out.println("Delivered!");
 					landscapeBytes = response.decompress();

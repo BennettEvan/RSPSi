@@ -150,7 +150,7 @@ public final class Client implements Runnable {
 			t.start();
 	
 			EventBus.getDefault().register(this);
-				new MeshLoader(cache.getProvider());
+			new MeshLoader(cache.getProvider());
 		} catch (Exception e) {
 			errorMessage = "There was an error loading the specified cache!";
 			error = true;
@@ -621,7 +621,7 @@ public final class Client implements Runnable {
 					// Each -6 is -0.5 in loop, for a total of +1 loop
 					int landscapeMapId = MapIndexLoader.resolve(cX, cY, MapType.LANDSCAPE);
 					chunk.tileMapId = landscapeMapId;
-					chunk.tileMapName = MapIndexLoader.getName(cX, cY, MapType.LANDSCAPE);
+					chunk.tileMapName = MapIndexLoader.getName(MapType.LANDSCAPE, cX, cY);
 					if (landscapeMapId != -1) {
 						getProvider().requestMap(landscapeMapId, hash);
 						System.out.println("Requesting landscape map " + landscapeMapId);
@@ -629,7 +629,7 @@ public final class Client implements Runnable {
 
 					int objectMapId = MapIndexLoader.resolve(cX, cY, MapType.OBJECT);
 					chunk.objectMapId = objectMapId;
-					chunk.objectMapName = MapIndexLoader.getName(cX, cY, MapType.OBJECT);
+					chunk.objectMapName = MapIndexLoader.getName(MapType.OBJECT, cX, cY);
 					if (objectMapId != -1) {
 						getProvider().requestMap(objectMapId, hash);
 						System.out.println("Requesting object map " + objectMapId);
@@ -1352,14 +1352,14 @@ public final class Client implements Runnable {
 	public final void processLoadedResources(ResourceResponse response) {
 		byte[] unzipped;
 		try {
-				unzipped = GZIPUtils.unzip(response.getData());
+				unzipped = GZIPUtils.unzip(response.data());
 			
 			if(unzipped == null) {
-				unzipped = response.getData();
+				unzipped = response.data();
 			}
 			
-			CacheFileType type = response.getRequest().getType();
-			int file = response.getRequest().getFile();
+			CacheFileType type = response.request().getType();
+			int file = response.request().getFile();
 			
 			//System.out.println("UNZIPPED " + type + ":" + file + " ATTEMPTING TO DELIVER");
 			lastDeliveredResource.set(response);
@@ -1424,8 +1424,8 @@ public final class Client implements Runnable {
 
 		if(worldY >= 50){
 			GameRasterizer rasterizer = GameRasterizer.getInstance();
-			int x = rasterizer.viewCenter.getX() + worldX * 512 / worldY;
-			int y = rasterizer.viewCenter.getY() + offsetHeight * 512 / worldY;
+			int x = rasterizer.viewCenter.x() + worldX * 512 / worldY;
+			int y = rasterizer.viewCenter.y() + offsetHeight * 512 / worldY;
 			return new Vector2(x , y);
 		} else {
 			return new Vector2(-1, -1);

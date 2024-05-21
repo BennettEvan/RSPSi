@@ -4,14 +4,14 @@ import com.jagex.util.ObjectKey;
 
 public interface WorldObject {
 
-	ObjectKey getKey();
+    ObjectKey getKey();
 
-	int getPlane();
+    int getPlane();
 
-	int getRenderHeight();
+    int getRenderHeight();
 
-	int getX();
+    int getX();
 
-	int getY();
+    int getY();
 
 }

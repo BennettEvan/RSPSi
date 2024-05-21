@@ -53,7 +53,7 @@ public class MapView extends JFrame {
 	
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onResourceResponse(ResourceResponse response) {
-		if(response.getRequest().getType() == CacheFileType.MAP) {
+		if(response.request().getType() == CacheFileType.MAP) {
 			for(Component component : jPanel.getComponents()) {
 				if(component instanceof RegionView) {
 					RegionView view = (RegionView) component;

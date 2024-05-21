@@ -994,7 +994,7 @@ public class GameRasterizer extends GameRaster {
                                 y2 = 0;
                             }
 
-                            int_40 = y1 - viewCenter.getY();
+                            int_40 = y1 - viewCenter.y();
                             int_31 += int_33 * int_40;
                             int_34 += int_36 * int_40;
                             int_37 += int_39 * int_40;
@@ -1086,7 +1086,7 @@ public class GameRasterizer extends GameRaster {
                                 y3 = 0;
                             }
 
-                            int_40 = y1 - viewCenter.getY();
+                            int_40 = y1 - viewCenter.y();
                             int_31 += int_33 * int_40;
                             int_34 += int_36 * int_40;
                             int_37 += int_39 * int_40;
@@ -1191,7 +1191,7 @@ public class GameRasterizer extends GameRaster {
                                 y3 = 0;
                             }
 
-                            int_40 = y2 - viewCenter.getY();
+                            int_40 = y2 - viewCenter.y();
                             int_31 += int_33 * int_40;
                             int_34 += int_36 * int_40;
                             int_37 += int_39 * int_40;
@@ -1283,7 +1283,7 @@ public class GameRasterizer extends GameRaster {
                                 y1 = 0;
                             }
 
-                            int_40 = y2 - viewCenter.getY();
+                            int_40 = y2 - viewCenter.y();
                             int_31 += int_33 * int_40;
                             int_34 += int_36 * int_40;
                             int_37 += int_39 * int_40;
@@ -1387,7 +1387,7 @@ public class GameRasterizer extends GameRaster {
                             y1 = 0;
                         }
 
-                        int_40 = y3 - viewCenter.getY();
+                        int_40 = y3 - viewCenter.y();
                         int_31 += int_33 * int_40;
                         int_34 += int_36 * int_40;
                         int_37 += int_39 * int_40;
@@ -1479,7 +1479,7 @@ public class GameRasterizer extends GameRaster {
                             y2 = 0;
                         }
 
-                        int_40 = y3 - viewCenter.getY();
+                        int_40 = y3 - viewCenter.y();
                         int_31 += int_33 * int_40;
                         int_34 += int_36 * int_40;
                         int_37 += int_39 * int_40;
@@ -1586,7 +1586,7 @@ public class GameRasterizer extends GameRaster {
             int int_20;
             int int_21;
             int int_22;
-            int_14 = int_3 - viewCenter.getX();
+            int_14 = int_3 - viewCenter.x();
             int_7 += int_14 * (int_10 >> 3);
             int_8 += (int_11 >> 3) * int_14;
             int_9 += int_14 * (int_12 >> 3);
@@ -1856,7 +1856,7 @@ public class GameRasterizer extends GameRaster {
                     c2 -= l7 * y2;
                     y2 = 0;
                 }
-                int k8 = y1 - viewCenter.getY();
+                int k8 = y1 - viewCenter.y();
                 l4 += j5 * k8;
                 k5 += i6 * k8;
                 j6 += l6 * k8;
@@ -1931,7 +1931,7 @@ public class GameRasterizer extends GameRaster {
                 c3 -= l7 * y3;
                 y3 = 0;
             }
-            int l8 = y1 - viewCenter.getY();
+            int l8 = y1 - viewCenter.y();
             l4 += j5 * l8;
             k5 += i6 * l8;
             j6 += l6 * l8;
@@ -2017,7 +2017,7 @@ public class GameRasterizer extends GameRaster {
                     c3 -= j8 * y3;
                     y3 = 0;
                 }
-                int i9 = y2 - viewCenter.getY();
+                int i9 = y2 - viewCenter.y();
                 l4 += j5 * i9;
                 k5 += i6 * i9;
                 j6 += l6 * i9;
@@ -2092,7 +2092,7 @@ public class GameRasterizer extends GameRaster {
                 c1 -= j8 * y1;
                 y1 = 0;
             }
-            int j9 = y2 - viewCenter.getY();
+            int j9 = y2 - viewCenter.y();
             l4 += j5 * j9;
             k5 += i6 * j9;
             j6 += l6 * j9;
@@ -2177,7 +2177,7 @@ public class GameRasterizer extends GameRaster {
                 c1 -= j7 * y1;
                 y1 = 0;
             }
-            int k9 = y3 - viewCenter.getY();
+            int k9 = y3 - viewCenter.y();
             l4 += j5 * k9;
             k5 += i6 * k9;
             j6 += l6 * k9;
@@ -2252,7 +2252,7 @@ public class GameRasterizer extends GameRaster {
             c2 -= j7 * y2;
             y2 = 0;
         }
-        int l9 = y3 - viewCenter.getY();
+        int l9 = y3 - viewCenter.y();
         l4 += j5 * l9;
         k5 += i6 * l9;
         j6 += l6 * l9;
@@ -2335,7 +2335,7 @@ public class GameRasterizer extends GameRaster {
         k += l;
         int j4 = 0;
         int l4 = 0;
-        int l6 = l - viewCenter.getX();
+        int l6 = l - viewCenter.x();
         l1 += (k2 >> 3) * l6;
         i2 += (l2 >> 3) * l6;
         j2 += (i3 >> 3) * l6;

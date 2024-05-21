@@ -61,7 +61,7 @@ public class Chunk {
     private ArrayDeque<AnimableObject> incompleteAnimables;
     private ArrayDeque<SpawnedObject> spawns;
     private boolean ready = false;
-    private boolean newMap;
+    @Setter private boolean newMap;
 
     protected Chunk() {
     }
@@ -74,8 +74,8 @@ public class Chunk {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onResourceResponse(ResourceResponse response) {
-        if (response.getRequest().getType() == CacheFileType.MAP) {
-            int fileId = response.getRequest().getFile();
+        if (response.request().getType() == CacheFileType.MAP) {
+            int fileId = response.request().getFile();
             if (fileId == tileMapId) {
                 tileMapData = response.decompress();
                 resourceDelivered.set(true);
@@ -118,8 +118,9 @@ public class Chunk {
     }
 
     public void drawMinimapScene(int plane) {
-        if (!updated)
+        if (!updated) {
             return;
+        }
 
         int[] raster = largeMinimapSprite.getRaster();
         int pixels = raster.length;
@@ -230,7 +231,6 @@ public class Chunk {
         });
 
         spawns.clear();
-
     }
 
     public void loadChunk() {
@@ -417,19 +417,22 @@ public class Chunk {
     }
 
     public boolean ready() {
-        if (ready)
+        if (ready) {
             return true;
-        if (newMap)
+        }
+        if (newMap) {
             return true;
+        }
         if (tileMapId != -1 && tileMapData == null) {
             return false;
         }
         if (objectMapId != -1 && objectMapData == null) {
             return false;
-        } else if (objectMapId != -1)
-            if (!MapRegion.objectsReady(objectMapData))
+        } else if (objectMapId != -1) {
+            if (!MapRegion.objectsReady(objectMapData)) {
                 return false;
-
+            }
+        }
         loadChunk();
         ready = true;
         return true;
@@ -450,24 +453,20 @@ public class Chunk {
 
             if (key != null) {
                 int id = key.getId();
-                int type = key.getType();
-                int orientation = key.getOrientation();
 
                 if (group == 0) {
                     scenegraph.removeWall(x, y, z);
-
                 } else if (group == 1) {
                     scenegraph.removeWallDecoration(x, y, z);
                 } else if (group == 2) {
                     scenegraph.removeObject(x, y, z);
                     ObjectDefinition definition = ObjectDefinitionLoader.lookup(id);
                     if (x + definition.getWidth() > 63 || y + definition.getWidth() > 63
-                            || x + definition.getLength() > 63 || y + definition.getLength() > 63)
+                            || x + definition.getLength() > 63 || y + definition.getLength() > 63) {
                         return;
-
-                } else if (group == 3) {
+                    }
+                } else {
                     scenegraph.removeFloorDecoration(x, y, z);
-
                 }
             }
 
@@ -502,14 +501,6 @@ public class Chunk {
         spawn.setPreviousId(id);
         spawn.setPreviousType(type);
         spawn.setPreviousOrientation(orientation);
-    }
-
-    public boolean isNewMap() {
-        return newMap;
-    }
-
-    public void setNewMap(boolean b) {
-        newMap = b;
     }
 
     public boolean hasLoaded() {

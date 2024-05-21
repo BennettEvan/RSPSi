@@ -142,7 +142,7 @@ public class RegionView extends JComponent {
 	}
 
 	public void deliverResource(ResourceResponse response) {
-		if(region != null && region.landscapeId == response.getRequest().getFile()) {
+		if(region != null && region.landscapeId == response.request().getFile()) {
 			region.onResourceResponse(response);
 		}
 	}

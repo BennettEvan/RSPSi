@@ -5,14 +5,13 @@ import com.jagex.cache.loader.IndexedLoaderBase;
 
 public abstract class VariableBitLoader implements IndexedLoaderBase<VariableBits> {
 
-	public static VariableBitLoader instance;
+    public static VariableBitLoader instance;
 
-	public static VariableBits lookup(int id) {
-		return instance.forId(id);
-	}
-	
-	public static int getCount() {
-		return instance.count();
-	}
+    public static VariableBits lookup(int id) {
+        return instance.forId(id);
+    }
 
+    public static int getCount() {
+        return instance.count();
+    }
 }

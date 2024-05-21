@@ -104,7 +104,6 @@ public abstract class Texture {
 
         palette = Ints.toArray(colours);
         averageTextureColour = 0;
-
         generatePixels();
     }
 

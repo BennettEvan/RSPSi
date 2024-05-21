@@ -5,10 +5,9 @@ import com.jagex.cache.loader.IndexedLoaderBase;
 
 public abstract class RSAreaLoader implements IndexedLoaderBase<RSArea> {
 
-	public static RSAreaLoader instance;
+    public static RSAreaLoader instance;
 
-	public static RSArea get(int id) {
-		return instance.forId(id);
-	}
-	
+    public static RSArea get(int id) {
+        return instance.forId(id);
+    }
 }

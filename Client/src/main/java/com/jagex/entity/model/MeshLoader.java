@@ -1,9 +1,9 @@
 package com.jagex.entity.model;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.jagex.net.ResourceProvider;
+import com.jagex.net.ResourceResponse;
 import com.rspsi.cache.CacheFileType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +11,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.jagex.net.ResourceProvider;
-import com.jagex.net.ResourceResponse;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class MeshLoader {
@@ -35,6 +34,18 @@ public class MeshLoader {
         singleton = this;
     }
 
+    public static Mesh load(byte[] data) {
+        MeshRevision revision = MeshUtils.getRevision(data);
+        if (revision == null) {
+            // default old format
+            return new MeshOldFormat(data);
+        }
+        return switch (revision) {
+            case OSRS_TYPE_3 -> new MeshOSRSType3(data);
+            case OSRS_TYPE_2 -> new MeshOSRSType2(data);
+        };
+    }
+
     public void clear(int id) {
         loadedMeshes.remove(id);
     }
@@ -46,21 +57,9 @@ public class MeshLoader {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onResourceResponse(ResourceResponse response) {
-        if (response.getRequest().getType() == CacheFileType.MODEL) {
-            load(response.decompress(), response.getRequest().getFile());
+        if (response.request().getType() == CacheFileType.MODEL) {
+            load(response.decompress(), response.request().getFile());
         }
-    }
-
-    public static Mesh load(byte[] data) {
-        MeshRevision revision = MeshUtils.getRevision(data);
-        if (revision == null) {
-            // default old format
-            return new MeshOldFormat(data);
-        }
-        return switch (revision) {
-            case OSRS_TYPE_3 -> new MeshOSRSType3(data);
-            case OSRS_TYPE_2 -> new MeshOSRSType2(data);
-        };
     }
 
     public Mesh load(byte[] data, int id) {

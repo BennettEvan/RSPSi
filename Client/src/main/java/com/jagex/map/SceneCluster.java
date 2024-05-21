@@ -1,7 +1,6 @@
 package com.jagex.map;
 
-final class SceneCluster { // FIXME crap name
-
+final class SceneCluster {
 	int anInt787;
 	int anInt788;
 	int anInt789;
@@ -20,5 +19,4 @@ final class SceneCluster { // FIXME crap name
 	int anInt802;
 	int anInt803;
 	int anInt804;
-
 }

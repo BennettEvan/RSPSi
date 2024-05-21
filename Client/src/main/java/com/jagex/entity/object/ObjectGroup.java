@@ -7,11 +7,13 @@ import java.util.List;
 
 import com.jagex.chunk.Chunk;
 import com.jagex.map.object.DefaultWorldObject;
+import lombok.Getter;
 
+@Getter
 public class ObjectGroup {
 
 	private final int objectId;
-	private List<DefaultWorldObject> objects;
+	private final List<DefaultWorldObject> objects;
 
 	public ObjectGroup(int objectId) {
 		objects = new ArrayList<>();
@@ -19,23 +21,13 @@ public class ObjectGroup {
 	}
 
 	public void addObject(DefaultWorldObject object) {
-		if (objects.contains(object))
-			return;
+		if (objects.contains(object)) {
+            return;
+        }
 		objects.add(object);
-
 	}
 
-	public int getObjectId() {
-		return objectId;
+    public void sort() {
+		objects.sort(Comparator.comparingInt(DefaultWorldObject::getLocHash));
 	}
-
-	public List<DefaultWorldObject> getObjects() {
-		return objects;
-	}
-
-	public void sort() {
-		Collections.sort(objects, Comparator.comparingInt(DefaultWorldObject::getLocHash));
-
-	}
-
 }

@@ -1,11 +1,5 @@
 package com.jagex.entity.model;
 
-import java.util.Arrays;
-import java.util.Objects;
-
-import lombok.extern.slf4j.Slf4j;
-import org.major.cache.anim.FrameConstants;
-
 import com.jagex.Client;
 import com.jagex.cache.anim.Frame;
 import com.jagex.cache.anim.FrameBase;
@@ -16,30 +10,30 @@ import com.jagex.util.Constants;
 import com.jagex.util.ObjectKey;
 import com.rspsi.core.misc.ToolType;
 import com.rspsi.options.Options;
+import lombok.extern.slf4j.Slf4j;
+import org.major.cache.anim.FrameConstants;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 @Slf4j
 public class Mesh extends Renderable {
 
+    public static int resourceCount;
+    public static ObjectKey[] resourceIDTag = new ObjectKey[1000];
+    public static int mouseX;
+    public static int mouseY;
+    static int centroidX;
+    static int centroidY;
+    static int centroidZ;
     public short ambient;
     public short contrast;
     public VertexNormal[] vertexNormals;
     public VertexNormal[] vertexNormalsOffsets;
     public FaceNormal[] faceNormals;
-
     public int id;
-    protected byte[] textureCoords;
     public byte[] textureRenderTypes;
-    public static int resourceCount;
-    public static ObjectKey[] resourceIDTag = new ObjectKey[1000];
-    public static int mouseX;
-    public static int mouseY;
-
-    static int centroidX;
-    static int centroidY;
-    static int centroidZ;
     public MeshRevision revision;
-    protected int[][] animayaGroups;
-    protected int[][] animayaScales;
     public boolean fitsOnSingleSquare;
     public int minimumX;
     public int maximumX;
@@ -75,6 +69,9 @@ public class Mesh extends Renderable {
     public int[] verticesY;
     public int[] verticesZ;
     public int verticesCount;
+    protected byte[] textureCoords;
+    protected int[][] animayaGroups;
+    protected int[][] animayaScales;
     private boolean translucent;
 
     protected Mesh() {
@@ -337,15 +334,57 @@ public class Mesh extends Renderable {
         contrast = model.contrast;
     }
 
-    public void apply(int frame) {
-        if (vertexGroups == null)
-            return;
-        else if (frame == -1)
-            return;
+    protected static short[] copyArray(short[] a) {
+        if (a == null) {
+            return null;
+        }
+        return Arrays.copyOf(a, a.length);
+    }
 
-        Frame animation = FrameLoader.lookup(frame);
-        if (animation == null)
+    protected static int[] copyArray(int[] a) {
+        if (a == null) {
+            return null;
+        }
+        return Arrays.copyOf(a, a.length);
+    }
+
+    protected static byte[] copyArray(byte[] a) {
+        if (a == null) {
+            return null;
+        }
+        return Arrays.copyOf(a, a.length);
+    }
+
+    protected static int[][] copyArray(int[][] a) {
+        if (a == null) {
+            return null;
+        }
+        return Arrays.copyOf(a, a.length);
+    }
+
+    private static boolean insideTriangle(int x, int y, int k, int l, int i1, int j1, int k1, int l1) {
+        if (y < k && y < l && y < i1) {
+            return false;
+        }
+        if (y > k && y > l && y > i1) {
+            return false;
+        }
+        if (x < j1 && x < k1 && x < l1) {
+            return false;
+        }
+        return x <= j1 || x <= k1 || x <= l1;
+    }
+
+    public void apply(int frame) {
+        if (vertexGroups == null) {
             return;
+        } else if (frame == -1) {
+            return;
+        }
+        Frame animation = FrameLoader.lookup(frame);
+        if (animation == null) {
+            return;
+        }
 
         FrameBase base = animation.getBase();
         centroidX = 0;
@@ -713,7 +752,6 @@ public class Mesh extends Renderable {
         return (var0 & '\uff80') + var1;
     }
 
-
     private void renderFaces(GameRasterizer rasterizer, boolean flag, boolean multiTileFlag, ObjectKey key, int z) {
         for (int j = 0; j < boundingSphereRadius; j++) {
             rasterizer.depthListIndices[j] = 0;
@@ -756,10 +794,11 @@ public class Mesh extends Renderable {
 
                     translucent = false;
                     if (key != null) {
-                        if (Options.currentTool.get() == ToolType.SELECT_OBJECT || Options.currentTool.get() == ToolType.DELETE_OBJECT)
+                        if (Options.currentTool.get() == ToolType.SELECT_OBJECT || Options.currentTool.get() == ToolType.DELETE_OBJECT) {
                             translucent = Objects.equals(Client.hoveredUID, key) && z == Options.currentHeight.get();
-                        else
+                        } else {
                             translucent = false;
+                        }
                     }
                     if ((i3 - l3) * (rasterizer.vertexScreenY[indexZ] - rasterizer.vertexScreenY[indexY])
                             - (rasterizer.vertexScreenY[indexX] - rasterizer.vertexScreenY[indexY]) * (k4 - l3) > 0) {
@@ -768,8 +807,9 @@ public class Mesh extends Renderable {
                                 || k4 > rasterizer.getMaxRight();
                         int k5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3
                                 + boundingCylinderRadius;
-                        if (k5 >= 0 && k5 < rasterizer.faceList.length)
+                        if (k5 >= 0 && k5 < rasterizer.faceList.length) {
                             rasterizer.faceList[k5][rasterizer.depthListIndices[k5]++] = face;
+                        }
                     }
                 }
             }
@@ -994,8 +1034,8 @@ public class Mesh extends Renderable {
     }
 
     private void method485(GameRasterizer rasterizer, int idx) {
-        int viewX = rasterizer.viewCenter.getX();
-        int viewY = rasterizer.viewCenter.getY();
+        int viewX = rasterizer.viewCenter.x();
+        int viewY = rasterizer.viewCenter.y();
         int l = 0;
         int i1 = trianglePointsX[idx];
         int j1 = trianglePointsY[idx];
@@ -1257,8 +1297,8 @@ public class Mesh extends Renderable {
     }
 
     public void render(GameRasterizer rasterizer, int rotationX, int roll, int yaw, int pitch, int transX, int transY, int transZ, int plane) {
-        int viewX = rasterizer.viewCenter.getX();
-        int viewY = rasterizer.viewCenter.getY();
+        int viewX = rasterizer.viewCenter.x();
+        int viewY = rasterizer.viewCenter.y();
         int j2 = Constants.SINE[rotationX];
         int k2 = Constants.COSINE[rotationX];
         int l2 = Constants.SINE[roll];
@@ -1317,35 +1357,37 @@ public class Mesh extends Renderable {
         int l2 = boundingPlaneRadius * yCosine >> 16;
         int i3 = k2 + l2;
 
-        if (i3 <= 50 || k2 >= (Options.renderDistance.get() * 140))
+        if (i3 <= 50 || k2 >= (Options.renderDistance.get() * 140)) {
             return;
+        }
 
         int j3 = y * xSine + x * xCosine >> 16;
         int sceneLowerX = j3 - boundingPlaneRadius << 9;
-        if (sceneLowerX / i3 >= rasterizer.getCentreX())
+        if (sceneLowerX / i3 >= rasterizer.getCentreX()) {
             return;
+        }
 
         int sceneMaximumX = j3 + boundingPlaneRadius << 9;
-        if (sceneMaximumX / i3 <= -rasterizer.getCentreX())
+        if (sceneMaximumX / i3 <= -rasterizer.getCentreX()) {
             return;
+        }
 
         int i4 = height * yCosine - j2 * ySine >> 16;
         int j4 = boundingPlaneRadius * ySine >> 16;
         int sceneMaximumY = i4 + j4 << 9;
 
-        if (sceneMaximumY / i3 <= -rasterizer.getCentreY())
+        if (sceneMaximumY / i3 <= -rasterizer.getCentreY()) {
             return;
+        }
 
         int l4 = j4 + (super.modelHeight * yCosine >> 16);
         int sceneLowerY = i4 - l4 << 9;
-        if (sceneLowerY / i3 >= rasterizer.getCentreY())
+        if (sceneLowerY / i3 >= rasterizer.getCentreY()) {
             return;
+        }
 
         int j5 = l2 + (super.modelHeight * ySine >> 16);
-        boolean flag = false;
-        if (k2 - j5 <= 50) {
-            flag = true;
-        }
+        boolean flag = k2 - j5 <= 50;
 
         boolean flag1 = false;
         int k5 = k2 - l2;
@@ -1369,8 +1411,8 @@ public class Mesh extends Renderable {
             sceneLowerY /= k5;
         }
 
-        int mouseSceneX = mouseX - rasterizer.viewCenter.getX();
-        int mouseSceneY = mouseY - rasterizer.viewCenter.getY();
+        int mouseSceneX = mouseX - rasterizer.viewCenter.x();
+        int mouseSceneY = mouseY - rasterizer.viewCenter.y();
         if (mouseSceneX > sceneLowerX && mouseSceneX < sceneMaximumX && mouseSceneY > sceneLowerY && mouseSceneY < sceneMaximumY) {
             if (fitsOnSingleSquare) {
                 resourceIDTag[resourceCount++] = key;
@@ -1382,8 +1424,8 @@ public class Mesh extends Renderable {
             }
         }
 
-        int viewX = rasterizer.viewCenter.getX();
-        int viewY = rasterizer.viewCenter.getY();
+        int viewX = rasterizer.viewCenter.x();
+        int viewY = rasterizer.viewCenter.y();
         int sine = 0;
         int cosine = 0;
 
@@ -1644,34 +1686,6 @@ public class Mesh extends Renderable {
         return mesh;
     }
 
-    protected static short[] copyArray(short[] a) {
-        if (a == null) {
-            return null;
-        }
-        return Arrays.copyOf(a, a.length);
-    }
-
-    protected static int[] copyArray(int[] a) {
-        if (a == null) {
-            return null;
-        }
-        return Arrays.copyOf(a, a.length);
-    }
-
-    protected static byte[] copyArray(byte[] a) {
-        if (a == null) {
-            return null;
-        }
-        return Arrays.copyOf(a, a.length);
-    }
-
-    protected static int[][] copyArray(int[][] a) {
-        if (a == null) {
-            return null;
-        }
-        return Arrays.copyOf(a, a.length);
-    }
-
     public void retexture(short src, short dst) {
         if (faceTextures != null) {
             for (int i = 0; i < faceTextures.length; i++) {
@@ -1680,15 +1694,5 @@ public class Mesh extends Renderable {
                 }
             }
         }
-    }
-
-    private static boolean insideTriangle(int x, int y, int k, int l, int i1, int j1, int k1, int l1) {
-        if (y < k && y < l && y < i1)
-            return false;
-        if (y > k && y > l && y > i1)
-            return false;
-        if (x < j1 && x < k1 && x < l1)
-            return false;
-        return x <= j1 || x <= k1 || x <= l1;
     }
 }

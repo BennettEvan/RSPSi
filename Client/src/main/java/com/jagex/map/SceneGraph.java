@@ -460,51 +460,13 @@ public class SceneGraph {
 		return decoration;
 	}
 
-	public void addGroundItem(int x, int y, int z, int key, Renderable primary, Renderable secondary,
-	                          Renderable tertiary, int plane) {
-		GroundItem item = new GroundItem();
-		item.setPrimary(primary);
-		item.setX(x * 128 + 64);
-		item.setY(y * 128 + 64);
-		item.setPlane(plane);
-		item.setKey(key);
-		item.setTertiary(secondary);
-		item.setSecondary(tertiary);
-		int itemHeight = 0;
-		SceneTile tile = getTile(z, x, y);
-
-		if (tile != null) {
-			for (int i = 0; i < tile.objectCount; i++) {
-				if (tile.gameObjects[i].getPrimary() instanceof Mesh) {
-					int l1 = ((Mesh) tile.gameObjects[i].getPrimary()).anInt1654;
-					if (l1 > itemHeight) {
-						itemHeight = l1;
-					}
-				}
-			}
-
-		}
-		item.setItemHeight(itemHeight);
-		if (tiles[z][x][y] == null) {
-			tiles[z][x][y] = new SceneTile(x, y, z);
-		}
-		tiles[z][x][y].groundItem = item;
-	}
-
 	public ObjectKey addObject(int tileX, int tileY, int plane, int objectId, int objectType, int rotation,
 	                           boolean temporary) {
 		if (tiles[plane][tileX][tileY] == null) {
 			tiles[plane][tileX][tileY] = new SceneTile(tileX, tileY, plane);
 		}
-
-		/*
-		 * DefaultWorldObject object = objectTool.get(); tile.temporaryObject =
-		 * Optional.of(object); tileQueue.pushFront(tile);
-		 */
 		return getMapRegion().spawnObjectToWorld(this, objectId, tileX, tileY, plane, objectType,
 				rotation, temporary);
-
-
 	}
 
 	public boolean addObject(int x, int y, int plane, int width, int length, Renderable renderable, ObjectKey key, int yaw,
@@ -828,14 +790,6 @@ public class SceneGraph {
 			tile.wallDecoration = decoration;
 			tile.hasUpdated = true;
 		}
-	}
-
-	public void clearGroundItem(int x, int y, int z) {
-		SceneTile tile = tiles[z][x][y];
-		if (tile == null)
-			return;
-
-		tile.groundItem = null;
 	}
 
 	public void deleteObjects() {
@@ -3408,14 +3362,14 @@ public class SceneGraph {
 		if (yC < 50)
 			return;
 
-		int screenXA = GameRasterizer.getInstance().viewCenter.getX() + (xA << 9) / yA;
-		int screenYA = GameRasterizer.getInstance().viewCenter.getY() + (centreHeight << 9) / yA;
-		int screenXB = GameRasterizer.getInstance().viewCenter.getX() + (xB << 9) / yB;
-		int screenYB = GameRasterizer.getInstance().viewCenter.getY() + (eastHeight << 9) / yB;
-		int screenXD = GameRasterizer.getInstance().viewCenter.getX() + (xD << 9) / yD;
-		int screenYD = GameRasterizer.getInstance().viewCenter.getY() + (northEastHeight << 9) / yD;
-		int screenXC = GameRasterizer.getInstance().viewCenter.getX() + (xC << 9) / yC;
-		int screenYC = GameRasterizer.getInstance().viewCenter.getY() + (northHeight << 9) / yC;
+		int screenXA = GameRasterizer.getInstance().viewCenter.x() + (xA << 9) / yA;
+		int screenYA = GameRasterizer.getInstance().viewCenter.y() + (centreHeight << 9) / yA;
+		int screenXB = GameRasterizer.getInstance().viewCenter.x() + (xB << 9) / yB;
+		int screenYB = GameRasterizer.getInstance().viewCenter.y() + (eastHeight << 9) / yB;
+		int screenXD = GameRasterizer.getInstance().viewCenter.x() + (xD << 9) / yD;
+		int screenYD = GameRasterizer.getInstance().viewCenter.y() + (northEastHeight << 9) / yD;
+		int screenXC = GameRasterizer.getInstance().viewCenter.x() + (xC << 9) / yC;
+		int screenYC = GameRasterizer.getInstance().viewCenter.y() + (northHeight << 9) / yC;
 
 		if ((screenXD - screenXC) * (screenYB - screenYC) - (screenYD - screenYC) * (screenXB - screenXC) > 0) {
 			GameRasterizer.getInstance().restrictEdges = screenXD < 0 || screenXC < 0 || screenXB < 0 || screenXD > GameRasterizer.getInstance().getMaxRight() || screenXC > GameRasterizer.getInstance().getMaxRight()
@@ -3528,14 +3482,14 @@ public class SceneGraph {
 		if (yC < 50)
 			return;
 
-		int screenXA = GameRasterizer.getInstance().viewCenter.getX() + (xA << 9) / yA;
-		int screenYA = GameRasterizer.getInstance().viewCenter.getY() + (centreHeight << 9) / yA;
-		int screenXB = GameRasterizer.getInstance().viewCenter.getX() + (xB << 9) / yB;
-		int screenYB = GameRasterizer.getInstance().viewCenter.getY() + (eastHeight << 9) / yB;
-		int screenXD = GameRasterizer.getInstance().viewCenter.getX() + (xD << 9) / yD;
-		int screenYD = GameRasterizer.getInstance().viewCenter.getY() + (northEastHeight << 9) / yD;
-		int screenXC = GameRasterizer.getInstance().viewCenter.getX() + (xC << 9) / yC;
-		int screenYC = GameRasterizer.getInstance().viewCenter.getY() + (northHeight << 9) / yC;
+		int screenXA = GameRasterizer.getInstance().viewCenter.x() + (xA << 9) / yA;
+		int screenYA = GameRasterizer.getInstance().viewCenter.y() + (centreHeight << 9) / yA;
+		int screenXB = GameRasterizer.getInstance().viewCenter.x() + (xB << 9) / yB;
+		int screenYB = GameRasterizer.getInstance().viewCenter.y() + (eastHeight << 9) / yB;
+		int screenXD = GameRasterizer.getInstance().viewCenter.x() + (xD << 9) / yD;
+		int screenYD = GameRasterizer.getInstance().viewCenter.y() + (northEastHeight << 9) / yD;
+		int screenXC = GameRasterizer.getInstance().viewCenter.x() + (xC << 9) / yC;
+		int screenYC = GameRasterizer.getInstance().viewCenter.y() + (northHeight << 9) / yC;
 
 		if ((screenXD - screenXC) * (screenYB - screenYC) - (screenYD - screenYC) * (screenXB - screenXC) > 0) {
 			GameRasterizer.getInstance().restrictEdges = screenXD < 0 || screenXC < 0 || screenXB < 0 || screenXD > GameRasterizer.getInstance().getMaxRight() || screenXC > GameRasterizer.getInstance().getMaxRight()
@@ -3656,8 +3610,8 @@ public class SceneGraph {
 				ShapedTile.viewSpaceY[vID] = viewspaceY;
 				ShapedTile.viewSpaceZ[vID] = viewspaceZ;
 			}
-			ShapedTile.screenX[vID] = GameRasterizer.getInstance().viewCenter.getX() + (viewspaceX << 9) / viewspaceZ;
-			ShapedTile.screenY[vID] = GameRasterizer.getInstance().viewCenter.getY() + (viewspaceY << 9) / viewspaceZ;
+			ShapedTile.screenX[vID] = GameRasterizer.getInstance().viewCenter.x() + (viewspaceX << 9) / viewspaceZ;
+			ShapedTile.screenY[vID] = GameRasterizer.getInstance().viewCenter.y() + (viewspaceY << 9) / viewspaceZ;
 			ShapedTile.screenZ[vID] = viewspaceZ;
 		}
 

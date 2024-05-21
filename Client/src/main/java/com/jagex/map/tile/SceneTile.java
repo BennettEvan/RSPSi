@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.jagex.link.Linkable;
-import com.jagex.map.GroundItem;
 import com.jagex.map.object.DefaultWorldObject;
 import com.jagex.map.object.GameObject;
 import com.jagex.map.object.GroundDecoration;
@@ -44,8 +43,6 @@ public final class SceneTile extends Linkable {
 	public GameObject[] gameObjects;
 	@ToString.Exclude
 	public GroundDecoration groundDecoration;
-	@ToString.Exclude
-	public GroundItem groundItem;
 	public int[] objectAttributes;
 	public int objectCount;
 	public int plane;

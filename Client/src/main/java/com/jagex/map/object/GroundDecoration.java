@@ -4,19 +4,19 @@ import com.jagex.cache.graphics.Sprite;
 import com.jagex.util.ObjectKey;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
+@Setter
+@Getter
 public final class GroundDecoration extends DefaultWorldObject {
 
-	public GroundDecoration(ObjectKey id, int x, int y, int renderHeight) {
-		super(id, x, y, renderHeight);
-	}
+    private Sprite minimapFunction = null;
 
-	@Getter @Setter
-	private Sprite minimapFunction = null;
-	@Override
-	public WorldObjectType getType() {
-		return WorldObjectType.GROUND_DECORATION;
-	}
+    public GroundDecoration(ObjectKey id, int x, int y, int renderHeight) {
+        super(id, x, y, renderHeight);
+    }
 
+    @Override
+    public WorldObjectType getType() {
+        return WorldObjectType.GROUND_DECORATION;
+    }
 }
